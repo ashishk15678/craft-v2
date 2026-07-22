@@ -1,0 +1,264 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// Better auth fields
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+enum ROLE {
+  SUPERADMIN
+  ADMIN
+  EDITOR
+  TEACHER
+  STUDENT
+}
+
+model User {
+  id              String    @unique @default(cuid())
+  name            String
+  email           String
+  emailVerified   Boolean   @default(false)
+  image           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  sessions        Session[]
+  accounts        Account[]
+  role            ROLE      @default(STUDENT)
+  username        String
+  displayUsername String
+  courses         Courses[]
+  studentProgress StudentProgress?
+  authoredChallenges Challenge[]       @relation("ChallengeAuthor")
+  enrollments       Enrollment[]
+  submissions       Submission[]
+  organizationMemberships OrganizationMember[]
+  auditLogs         AuditLog[]         @relation("AuditActor")
+
+  @@unique([email])
+  @@unique([username])
+  @@map("user")
+}
+
+enum ChallengeStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ChallengeAccess {
+  OPEN
+  PAID
+  PRIVATE
+}
+
+enum ReviewStatus {
+  REQUESTED
+  ASSIGNED
+  APPROVED
+  CHANGES_REQUESTED
+}
+
+model Challenge {
+  id          String          @id @default(cuid())
+  slug        String          @unique
+  title       String
+  summary     String
+  track       String
+  status      ChallengeStatus @default(DRAFT)
+  access      ChallengeAccess @default(OPEN)
+  priceCents  Int             @default(0)
+  languages   String          @default("TypeScript,Python,Go,Rust,C++,Java")
+  dockerImage String?
+  starterRepo String?
+  creatorId   String
+  creator     User            @relation("ChallengeAuthor", fields: [creatorId], references: [id])
+  stages      ChallengeStage[]
+  enrollments Enrollment[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model ChallengeStage {
+  id          String      @id @default(cuid())
+  challengeId String
+  challenge   Challenge   @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  position    Int
+  title       String
+  brief       String
+  hint        String
+  testCommand String
+  submissions Submission[]
+
+  @@unique([challengeId, position])
+}
+
+model Enrollment {
+  id          String     @id @default(cuid())
+  userId      String
+  challengeId String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge   Challenge  @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  language    String     @default("TypeScript")
+  currentStage Int       @default(1)
+  completedAt DateTime?
+  benchmarks Benchmark[]
+  peerReviews PeerReview[] @relation("ReviewAuthor")
+
+  @@unique([userId, challengeId])
+}
+
+model Submission {
+  id          String         @id @default(cuid())
+  userId      String
+  stageId     String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stage       ChallengeStage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  commitSha   String
+  testOutput  String
+  passed      Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+}
+
+model Benchmark {
+  id           String     @id @default(cuid())
+  enrollmentId String
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  requestsPerSecond Float
+  p99LatencyMs Float
+  memoryMb     Float
+  verifiedAt   DateTime   @default(now())
+}
+
+model PeerReview {
+  id           String       @id @default(cuid())
+  enrollmentId String
+  reviewerId   String?
+  status       ReviewStatus @default(REQUESTED)
+  notes        String?
+  enrollment   Enrollment   @relation("ReviewAuthor", fields: [enrollmentId], references: [id], onDelete: Cascade)
+  createdAt    DateTime     @default(now())
+}
+
+model Organization {
+  id        String               @id @default(cuid())
+  name      String
+  slug      String               @unique
+  members   OrganizationMember[]
+  createdAt DateTime             @default(now())
+}
+
+model OrganizationMember {
+  id             String       @id @default(cuid())
+  organizationId String
+  userId         String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String       @default("LEARNER")
+
+  @@unique([organizationId, userId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actor     User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  action    String
+  target    String
+  metadata  String?
+  createdAt DateTime @default(now())
+}
+
+model StudentProgress {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  activeChallenge     String   @default("Build Your Own KV Store")
+  language            String   @default("TypeScript")
+  currentStage        Int      @default(4)
+  totalStages         Int      @default(6)
+  hintsUsed           Int      @default(1)
+  peerReviewRequested Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("student_progress")
+}
+
+model Courses {
+  id        String   @unique @default(cuid())
+  name      String
+  description String
+  lessons   Lessons[]
+  creatorId String
+  creator   User     @relation(fields: [creatorId], references: [id])
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Lessons {
+  id        String   @unique @default(cuid())
+  name      String
+  courseId  String
+  course    Courses @relation(fields: [courseId], references: [id])
+  content   String
+
+}
