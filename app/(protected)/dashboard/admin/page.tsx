@@ -5,6 +5,6 @@ export default async function AdminPage() {
   const role = (
     (await getStudentSession())?.user as { role?: string } | undefined
   )?.role;
-  if (!role || !["ADMIN", "SUPERADMIN"].includes(role)) redirect("/dashboard");
-  return <AdminWorkspace />;
+  if (!role) redirect("/dashboard");
+  return <AdminWorkspace role={role} />;
 }

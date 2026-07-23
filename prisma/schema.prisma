@@ -62,12 +62,19 @@ model Verification {
 }
 
 enum ROLE {
+  ORG_MANAGER
   SUPERADMIN
   ADMIN
   EDITOR
   TEACHER
   STUDENT
 }
+
+// Granular per-org roles (stored as string in OrganizationMember.orgRole)
+// ORG_OWNER   – person who created the org; can do everything inside it
+// ORG_ADMIN   – can invite, remove, and change roles of INSTRUCTOR/LEARNER
+// INSTRUCTOR  – can create team tracks and review learner submissions
+// LEARNER     – read-only access to org tracks
 
 model User {
   id              String    @unique @default(cuid())
@@ -129,8 +136,11 @@ model Challenge {
   starterRepo String?
   creatorId   String
   creator     User            @relation("ChallengeAuthor", fields: [creatorId], references: [id])
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   stages      ChallengeStage[]
   enrollments Enrollment[]
+  teamTracks TeamTrack[]
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 }
@@ -197,11 +207,31 @@ model PeerReview {
 }
 
 model Organization {
-  id        String               @id @default(cuid())
-  name      String
-  slug      String               @unique
-  members   OrganizationMember[]
-  createdAt DateTime             @default(now())
+  id          String               @id @default(cuid())
+  name        String
+  slug        String               @unique
+  description String?
+  ownerId     String?
+  members     OrganizationMember[]
+  challenges  Challenge[]
+  teamTracks  TeamTrack[]
+  createdAt   DateTime             @default(now())
+}
+
+model TeamTrack {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  challengeId    String?
+  challenge      Challenge?   @relation(fields: [challengeId], references: [id], onDelete: SetNull)
+  title          String
+  description    String
+  createdById    String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
+  @@index([challengeId])
 }
 
 model OrganizationMember {
@@ -210,7 +240,9 @@ model OrganizationMember {
   userId         String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Per-org granular role: ORG_OWNER | ORG_ADMIN | INSTRUCTOR | LEARNER
   role           String       @default("LEARNER")
+  joinedAt       DateTime     @default(now())
 
   @@unique([organizationId, userId])
 }

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TopNavBar } from "@/components/top-nav";
+import { OrgContextBridge } from "@/components/org-context-bridge";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,11 +46,13 @@ export default function RootLayout({
 
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider attribute="class" enableSystem>
-          <TopNavBar />
-          {/* Main content area padded to clear fixed top notched header */}
-          <main className="flex-1 pt-10 px-4">
-            {children}
-          </main>
+          <OrgContextBridge>
+            <TopNavBar />
+            {/* Main content area padded to clear fixed top notched header */}
+            <main className="flex-1 pt-10 px-4">
+              {children}
+            </main>
+          </OrgContextBridge>
         </ThemeProvider>
       </body>
     </html>
