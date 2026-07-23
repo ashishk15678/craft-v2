@@ -1,9 +1,15 @@
 # Craft seed data
 
-Run the Prisma migrations first, then load the demo organization, role accounts, challenges, stages, enrollment, benchmark, review request, and audit records:
+Run the Prisma seed command to populate the database with the demo organization, role accounts, challenges, stages, enrollment, benchmark, review request, and audit records:
 
 ```bash
-npx prisma db execute --file seeds/platform.sql
+npx prisma db seed
 ```
 
-The seed records intentionally do not include authentication passwords or sessions. Register normally with any seed email if you need a local sign-in account, or use the records as fixtures for tests and admin tooling.
+All seed users are created with the password: `password123`.
+
+You can sign in with:
+- `avery@craft.local` (SUPERADMIN)
+- `jordan@craft.local` (ADMIN)
+- `mira@craft.local` (TEACHER)
+- `dev@craft.local` (STUDENT)
