@@ -4,12 +4,8 @@ import { username } from "better-auth/plugins";
 import { prisma } from "./db";
 
 export const auth = betterAuth({
-  database: prismaAdapter(prisma, {
-    provider: "sqlite",
-  }),
-  emailAndPassword: {
-    enabled: true,
-  },
+  database: prismaAdapter(prisma, { provider: "sqlite" }),
+  emailAndPassword: { enabled: true },
   socialProviders: {
     github: {
       clientId: process.env.GITHUB_CLIENT_ID as string,
@@ -17,4 +13,9 @@ export const auth = betterAuth({
     },
   },
   plugins: [username()],
+  user: {
+    additionalFields: {
+      role: { type: "string", defaultValue: "USER" },
+    },
+  },
 });

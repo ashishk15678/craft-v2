@@ -12,4 +12,4 @@ You can sign in with:
 - `avery@craft.local` (SUPERADMIN)
 - `jordan@craft.local` (ADMIN)
 - `mira@craft.local` (TEACHER)
-- `dev@craft.local` (STUDENT)
+- `dev@craft.local` (STUDENT)w

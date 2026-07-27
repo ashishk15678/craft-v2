@@ -19,10 +19,7 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const stepTitles = {
-    1: "Identity",
-    2: "Security",
-  };
+  const stepTitles = { 1: "Identity", 2: "Security" };
 
   const handleNext = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -58,36 +55,31 @@ export default function RegisterPage() {
 
   const handleBack = () => {
     setError("");
-    if (step > 1) {
-      setStep((prev) => (prev - 1) as 1 | 2);
-    }
+    if (step > 1) setStep((prev) => (prev - 1) as 1 | 2);
   };
 
   return (
-    <div className="h-[calc(100vh-(var(--spacing)*10))] w-full flex flex-col items-center justify-center">
-      <div className="bg-card border border-border rounded-xl ">
-        <div className="w-full max-w-md min-w-sm mx-auto space-y-4 text-text font-sans h-fit overflow-hidden">
+    <div className="min-h-[calc(100vh-2.5rem)] w-full flex flex-col items-center justify-center px-4 py-8">
+      <div className="w-full max-w-sm bg-card border border-border rounded-xl overflow-hidden">
+        <div className="w-full min-w-sm space-y-4 text-text font-sans">
           {/* Progress Bar */}
-          <div className="">
-            <div className="h-1.5 w-full   overflow-hidden">
-              <div
-                className="h-full bg-indigo-600 transition-all duration-300 ease-out"
-                style={{ width: `${(step / 2) * 100}%` }}
-              />
-            </div>
+          <div className="h-1.5 w-full overflow-hidden">
+            <div
+              className="h-full bg-indigo-600 transition-all duration-300 ease-out"
+              style={{ width: `${(step / 2) * 100}%` }}
+            />
           </div>
 
-          {/* Header with Inline Title & Animated Subtitle */}
+          {/* Header */}
           <div className="px-4 flex items-baseline justify-between overflow-hidden">
             <div>
               <h1 className="text-2xl font-black tracking-tight uppercase black-ops-one-regular">
                 Create Account
               </h1>
-              <p className=" w-full text-zinc-400 dark:text-zinc-600">
-                Fill below form{" "}
+              <p className="text-zinc-400 dark:text-zinc-500 text-sm">
+                Fill below form
               </p>
             </div>
-            {/* Animated Step Subtitle Container */}
             <div className="relative h-6 overflow-hidden flex items-center justify-end">
               <AnimatePresence mode="wait">
                 <motion.span
@@ -104,16 +96,17 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Compact Form Body — fits content tightly */}
-          <form onSubmit={handleNext} className="space-y-4 p-2 h-fit">
+          {/* Form */}
+          <form onSubmit={handleNext} className="space-y-4 px-4 pb-4">
             {error && (
               <p
                 role="alert"
-                className="rounded-lg border  p-1 text-xs font-mono text-red-400"
+                className="rounded-lg border p-1 text-xs font-mono text-red-400"
               >
                 {error}
               </p>
             )}
+
             {/* STEP 1: IDENTITY */}
             {step === 1 && (
               <div className="space-y-4">
@@ -130,11 +123,9 @@ export default function RegisterPage() {
                     required
                     minLength={3}
                     value={formData.username}
-                    onChange={(e) =>
-                      setFormData({ ...formData, username: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                     placeholder="ShadowSlayer"
-                    className="w-full bg-accent text-sm p-1 rounded-lg text-text placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono"
+                    className="w-full bg-accent text-sm px-3 py-2 rounded-lg text-text placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono"
                   />
                 </div>
 
@@ -149,11 +140,9 @@ export default function RegisterPage() {
                     type="email"
                     required
                     value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="hero@realm.io"
-                    className="w-full bg-accent text-sm p-1 rounded-lg text-text placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono"
+                    className="w-full bg-accent text-sm px-3 py-2 rounded-lg text-text placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono"
                   />
                 </div>
               </div>
@@ -176,11 +165,9 @@ export default function RegisterPage() {
                       required
                       minLength={6}
                       value={formData.password}
-                      onChange={(e) =>
-                        setFormData({ ...formData, password: e.target.value })
-                      }
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       placeholder="••••••••••••"
-                      className="w-full bg-accent text-sm p-1 rounded-lg text-text placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono pr-12"
+                      className="w-full bg-accent text-sm px-3 py-2 rounded-lg text-text placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono pr-12"
                     />
                     <button
                       type="button"
@@ -195,23 +182,17 @@ export default function RegisterPage() {
                 <div className="space-y-1">
                   <label className="text-xs font-mono uppercase text-zinc-400 flex justify-between">
                     <span>Confirm Passkey</span>
-                    {formData.confirmPassword &&
-                      formData.confirmPassword === formData.password && (
-                        <span className="text-emerald-400">✓ Matches</span>
-                      )}
+                    {formData.confirmPassword && formData.confirmPassword === formData.password && (
+                      <span className="text-emerald-400">✓ Matches</span>
+                    )}
                   </label>
                   <input
                     type={showPassword ? "text" : "password"}
                     required
                     value={formData.confirmPassword}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        confirmPassword: e.target.value,
-                      })
-                    }
+                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                     placeholder="••••••••••••"
-                    className="w-full bg-accent text-sm p-1 rounded-lg text-text placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono"
+                    className="w-full bg-accent text-sm px-3 py-2 rounded-lg text-text placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono"
                   />
                 </div>
               </div>
@@ -223,7 +204,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={handleBack}
-                  className="w-1/3 bg-accent text-text font-mono text-xs py-2 rounded-lg  border-8 border-border transition-all active:scale-[0.98]"
+                  className="w-1/3 bg-accent text-text font-mono text-xs py-2 rounded-lg border-8 border-border transition-all active:scale-[0.98]"
                 >
                   BACK
                 </button>
@@ -237,9 +218,7 @@ export default function RegisterPage() {
               >
                 <span className="relative z-10 flex items-center justify-center gap-2 font-mono uppercase tracking-wider">
                   {isSubmitted ? (
-                    <>
-                      Registering...
-                    </>
+                    <>Registering...</>
                   ) : step === 2 ? (
                     <>Register ➔</>
                   ) : (
@@ -249,16 +228,12 @@ export default function RegisterPage() {
               </button>
             </div>
           </form>
-
-
         </div>
       </div>
-      <p className="px-4 py-2 text-center text-xs text-zinc-400">
+
+      <p className="px-4 py-3 text-center text-xs text-zinc-400">
         Already registered?{" "}
-        <Link
-          href="/login"
-          className="font-mono text-indigo-400 hover:text-indigo-300"
-        >
+        <Link href="/login" className="font-mono text-indigo-400 hover:text-indigo-300">
           Sign in
         </Link>
       </p>
