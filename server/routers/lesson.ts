@@ -2,7 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { router, authedProcedure, orgProcedure } from "@/server/trpc";
 import { canTeach, hasGlobalRole } from "@/lib/rbac";
-import { commitFiles, orgRepoName } from "@/lib/github";
+import { commitFiles } from "@/lib/github";
 
 function fireAndForget(fn: () => Promise<unknown>) {
   fn().catch((e: unknown) => console.warn("[bg]", e instanceof Error ? e.message : e));
@@ -112,7 +112,7 @@ export const lessonRouter = router({
       // Sync content to GitHub asynchronously
       if (content && lesson.repoPath && process.env.GITHUB_TOKEN && process.env.GITHUB_ORG) {
         fireAndForget(() =>
-          commitFiles(orgRepoName(lesson.course.organization.slug), [{ path: lesson.repoPath!, content }], `lesson: update ${lesson.title}`)
+          commitFiles(lesson.course.organization.slug, [{ path: lesson.repoPath!, content }], `lesson: update ${lesson.title}`)
         );
       }
 
@@ -178,7 +178,7 @@ export const lessonRouter = router({
   submitQuiz: authedProcedure
     .input(z.object({
       lessonId: z.string(),
-      answers: z.record(z.string(), z.unknown()),
+      answers: z.record(z.unknown()),
       score: z.number().int(),
       maxScore: z.number().int(),
     }))

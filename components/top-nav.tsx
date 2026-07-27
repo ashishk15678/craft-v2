@@ -1,22 +1,35 @@
+// components/top-nav.tsx
+// Server component — keeps auth check server-side.
+
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import Link from "next/link";
-import { getSession } from "@/lib/session";
 import ToggleTheme from "./mode-toggle";
+import { OrgSwitcher } from "./org-switcher";
+import { NavHamburger } from "./nav-hamburger";
 
 export async function TopNavBar() {
-  const user = await getSession();
+  const session = await auth.api.getSession({ headers: await headers() });
+  const isLoggedIn = !!session?.user?.email;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-        <Link href="/" className="text-lg font-black tracking-tight">
+    <div className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border">
+      <div className="mx-auto h-10 flex flex-row items-center gap-2 px-4 max-w-6xl">
+        <NavHamburger />
+
+        <Link href="/" className="black-ops-one-regular text-sm tracking-wide shrink-0">
           Craft
         </Link>
-        <nav className="flex items-center gap-3">
+
+        <div className="flex-1" />
+
+        <div className="flex items-center gap-x-2">
+          {isLoggedIn && <OrgSwitcher />}
           <ToggleTheme />
-          {user ? (
+          {isLoggedIn ? (
             <Link
               href="/dashboard"
-              className="rounded-lg bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-mono font-bold uppercase py-1 px-3 rounded-lg transition-colors"
             >
               Dashboard
             </Link>
@@ -24,20 +37,20 @@ export async function TopNavBar() {
             <>
               <Link
                 href="/login"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-xs font-mono font-bold uppercase text-zinc-400 hover:text-indigo-400 transition-colors py-1 px-2"
               >
                 Sign in
               </Link>
               <Link
                 href="/register"
-                className="rounded-lg bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-mono font-bold uppercase py-1 px-3 rounded-lg transition-colors"
               >
-                Get started
+                Join free
               </Link>
             </>
           )}
-        </nav>
+        </div>
       </div>
-    </header>
+    </div>
   );
 }
