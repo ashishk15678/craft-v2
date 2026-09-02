@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { OrgSwitcher } from "./org-switcher";
+import { MobileNavToggle } from "./mobile-nav-toggle";
 
 export async function TopNavBar() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -30,12 +31,7 @@ export async function TopNavBar() {
           {isLoggedIn && <OrgSwitcher />}
 
           {isLoggedIn ? (
-            <Link
-              href="/dashboard"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-1 px-3 rounded-lg transition-colors"
-            >
-              Dashboard
-            </Link>
+            <MobileNavToggle />
           ) : (
             <Link
               href="/login"

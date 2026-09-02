@@ -6,6 +6,8 @@ import { authClient } from "@/lib/auth-client";
 import { useOrg } from "@/contexts/org-context";
 import CreateOrganization from "./createOrganization";
 import { useState } from "react";
+import { useMobileNav } from "@/contexts/mobile-nav-context";
+
 
 const BASE_NAV = [
   ["Overview", "/dashboard"],
@@ -57,9 +59,7 @@ const ORG_ROLE_NAV: Record<string, ReadonlyArray<readonly [string, string]>> = {
     ["Teaching studio", "/dashboard/teach"],
     ["Org management", "/dashboard/admin"],
   ],
-  INSTRUCTOR: [
-    ["Teaching studio", "/dashboard/teach"],
-  ],
+  INSTRUCTOR: [["Teaching studio", "/dashboard/teach"]],
 };
 
 export function StudentSidebar({
@@ -74,7 +74,7 @@ export function StudentSidebar({
   const pathname = usePathname();
   const router = useRouter();
   const org = useOrg();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const { mobileOpen, setMobileOpen } = useMobileNav();
   const [isCreateOrgOpen, setCreateOrgOpen] = useState(false);
 
   const globalRole = org.globalRole ?? _propRole;
@@ -172,18 +172,6 @@ export function StudentSidebar({
   return (
     <>
       {/* Mobile Header Bar */}
-      <div className="flex lg:hidden items-center justify-between border-b border-border bg-background px-4 py-3 sticky top-0 z-50">
-        <span className="font-mono text-xs font-bold uppercase text-indigo-400 truncate">
-          {currentOrg?.name || "Dashboard"}
-        </span>
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="p-2 rounded-lg font-mono text-xs uppercase border border-border text-text"
-          aria-label="Toggle Menu"
-        >
-          {mobileOpen ? "Close" : "Menu"}
-        </button>
-      </div>
 
       {/* Mobile Slide-out Drawer Overlay */}
       {mobileOpen && (
@@ -201,7 +189,7 @@ export function StudentSidebar({
       >
         {renderNavContent()}
       </aside>
- <aside className="hidden lg:fixed lg:top-10 lg:left-10 lg:flex lg:w-60 lg:flex-col lg:h-[calc(100vh-5rem)] lg:border lg:border-border lg:bg-background z-30 overflow-hidden shadow-sm">
+      <aside className="hidden lg:fixed lg:top-10 lg:left-10 lg:flex lg:w-60 lg:flex-col lg:h-[calc(100vh-5rem)] lg:border lg:border-border lg:bg-background z-30 overflow-hidden shadow-sm">
         {renderNavContent()}
       </aside>
 

@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { TopNavBar } from "@/components/top-nav";
 import { OrgContextBridge } from "@/components/org-context-bridge";
 import { TRPCProvider } from "@/lib/trpc/provider";
+import { MobileNavProvider } from "@/contexts/mobile-nav-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,10 +50,10 @@ export default function RootLayout({
         <ThemeProvider attribute="class" enableSystem>
           <TRPCProvider>
             <OrgContextBridge>
-              <TopNavBar />
-              <main className="flex-1 pt-10 px-4">
-                {children}
-              </main>
+              <MobileNavProvider>
+                <TopNavBar />
+                <main className="flex-1 pt-10 px-4">{children}</main>
+              </MobileNavProvider>
             </OrgContextBridge>
           </TRPCProvider>
         </ThemeProvider>
