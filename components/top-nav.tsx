@@ -7,7 +7,7 @@ import { OrgSwitcher } from "./org-switcher";
 
 export async function TopNavBar() {
   const session = await auth.api.getSession({ headers: await headers() });
-  const isLoggedIn = true || !!session?.user?.email;
+  const isLoggedIn = !!session?.user?.email;
 
   return (
     <div className="fixed top-0 left-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -31,10 +31,10 @@ export async function TopNavBar() {
 
           {isLoggedIn ? (
             <Link
-              href="/profile"
+              href="/dashboard"
               className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-1 px-3 rounded-lg transition-colors"
             >
-              Profile
+              Dashboard
             </Link>
           ) : (
             <Link

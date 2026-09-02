@@ -118,7 +118,7 @@ export default function LoginPage() {
             />
             <span>Remember Guild</span>
           </label>
-          <a href="#" className="text-indigo-400 hover:text-indigo-300 font-mono">
+          <a href="#" className="text-indigo-500 hover:text-indigo-300 font-mono">
             Lost Cipher?
           </a>
         </div>
@@ -126,15 +126,15 @@ export default function LoginPage() {
         {/* Action Button */}
         <button
           type="submit"
-          className="w-full relative group overflow-hidden rounded-lg border-8 border-indigo-500  bg-indigo-600 py-2 text-sm font-bold text-white transition-all active:scale-[0.98]"
+          className="w-full relative group overflow-hidden rounded-lg  bg-linear-to-b from-indigo-400 to-indigo-600 py-2 text-sm font-bold text-white transition-all active:scale-[0.98]"
         >
           <span className="relative z-10 flex items-center justify-center gap-2 font-mono uppercase tracking-wider">
             {isSubmitted ? (
               <>
-                <span className="animate-spin">⚙</span> INITIALIZING SESSION...
+                <span className="animate-spin text-xl">⚙</span> Logging in...
               </>
             ) : (
-              <>READY TO PLAY ➔</>
+              <>LOGIN</>
             )}
           </span>
         </button>

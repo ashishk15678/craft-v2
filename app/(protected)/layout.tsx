@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { StudentSidebar } from "@/components/student-sidebar";
+import { StudentSidebar } from "@/components/sidebar";
 import { getStudentSession } from "@/lib/student-session";
 import { prisma } from "@/lib/db";
 

@@ -409,7 +409,8 @@ async function organizationMutation(
           slug,
           description: description || null,
           ownerId: userId,
-          members: { create: { userId, role: "ORG_OWNER" } },
+          // Use our custom RBAC membership table (not the better-auth Member table)
+          orgMembers: { create: { userId, role: "ORG_OWNER" } },
         },
       })
       .catch(() => null);

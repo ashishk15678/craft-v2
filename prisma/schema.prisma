@@ -13,6 +13,7 @@ datasource db {
 }
 
 // Better auth fields
+
 model Session {
   id        String   @id
   expiresAt DateTime
@@ -23,6 +24,8 @@ model Session {
   userAgent String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  activeOrganizationId String?
 
   @@unique([token])
   @@index([userId])
@@ -77,25 +80,29 @@ enum ROLE {
 // LEARNER     – read-only access to org tracks
 
 model User {
-  id              String    @unique @default(cuid())
-  name            String
-  email           String
-  emailVerified   Boolean   @default(false)
-  image           String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  sessions        Session[]
-  accounts        Account[]
-  role            ROLE      @default(STUDENT)
-  username        String
-  displayUsername String
-  courses         Courses[]
-  studentProgress StudentProgress?
-  authoredChallenges Challenge[]       @relation("ChallengeAuthor")
-  enrollments       Enrollment[]
-  submissions       Submission[]
+  id                      String               @unique @default(cuid())
+  name                    String
+  email                   String
+  emailVerified           Boolean              @default(false)
+  image                   String?
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
+  sessions                Session[]
+  accounts                Account[]
+  role                    ROLE                 @default(STUDENT)
+  username                String
+  displayUsername         String
+  courses                 Courses[]
+  studentProgress         StudentProgress?
+  authoredChallenges      Challenge[]          @relation("ChallengeAuthor")
+  enrollments             Enrollment[]
+  submissions             Submission[]
   organizationMemberships OrganizationMember[]
-  auditLogs         AuditLog[]         @relation("AuditActor")
+  auditLogs               AuditLog[]           @relation("AuditActor")
+
+  members     Member[]
+  invitations Invitation[]
+  topics      Topic[]      @relation("TopicCreator")
 
   @@unique([email])
   @@unique([username])
@@ -123,32 +130,32 @@ enum ReviewStatus {
 }
 
 model Challenge {
-  id          String          @id @default(cuid())
-  slug        String          @unique
-  title       String
-  summary     String
-  track       String
-  status      ChallengeStatus @default(DRAFT)
-  access      ChallengeAccess @default(OPEN)
-  priceCents  Int             @default(0)
-  languages   String          @default("TypeScript,Python,Go,Rust,C++,Java")
-  dockerImage String?
-  starterRepo String?
-  creatorId   String
-  creator     User            @relation("ChallengeAuthor", fields: [creatorId], references: [id])
+  id             String           @id @default(cuid())
+  slug           String           @unique
+  title          String
+  summary        String
+  track          String
+  status         ChallengeStatus  @default(DRAFT)
+  access         ChallengeAccess  @default(OPEN)
+  priceCents     Int              @default(0)
+  languages      String           @default("TypeScript,Python,Go,Rust,C++,Java")
+  dockerImage    String?
+  starterRepo    String?
+  creatorId      String
+  creator        User             @relation("ChallengeAuthor", fields: [creatorId], references: [id])
   organizationId String?
-  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-  stages      ChallengeStage[]
-  enrollments Enrollment[]
-  teamTracks TeamTrack[]
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  organization   Organization?    @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  stages         ChallengeStage[]
+  enrollments    Enrollment[]
+  teamTracks     TeamTrack[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 }
 
 model ChallengeStage {
-  id          String      @id @default(cuid())
+  id          String       @id @default(cuid())
   challengeId String
-  challenge   Challenge   @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challenge   Challenge    @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   position    Int
   title       String
   brief       String
@@ -160,40 +167,40 @@ model ChallengeStage {
 }
 
 model Enrollment {
-  id          String     @id @default(cuid())
-  userId      String
-  challengeId String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  challenge   Challenge  @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  language    String     @default("TypeScript")
-  currentStage Int       @default(1)
-  completedAt DateTime?
-  benchmarks Benchmark[]
-  peerReviews PeerReview[] @relation("ReviewAuthor")
+  id           String       @id @default(cuid())
+  userId       String
+  challengeId  String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge    Challenge    @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  language     String       @default("TypeScript")
+  currentStage Int          @default(1)
+  completedAt  DateTime?
+  benchmarks   Benchmark[]
+  peerReviews  PeerReview[] @relation("ReviewAuthor")
 
   @@unique([userId, challengeId])
 }
 
 model Submission {
-  id          String         @id @default(cuid())
-  userId      String
-  stageId     String
-  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  stage       ChallengeStage @relation(fields: [stageId], references: [id], onDelete: Cascade)
-  commitSha   String
-  testOutput  String
-  passed      Boolean        @default(false)
-  createdAt   DateTime       @default(now())
+  id         String         @id @default(cuid())
+  userId     String
+  stageId    String
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stage      ChallengeStage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  commitSha  String
+  testOutput String
+  passed     Boolean        @default(false)
+  createdAt  DateTime       @default(now())
 }
 
 model Benchmark {
-  id           String     @id @default(cuid())
-  enrollmentId String
-  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  id                String     @id @default(cuid())
+  enrollmentId      String
+  enrollment        Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
   requestsPerSecond Float
-  p99LatencyMs Float
-  memoryMb     Float
-  verifiedAt   DateTime   @default(now())
+  p99LatencyMs      Float
+  memoryMb          Float
+  verifiedAt        DateTime   @default(now())
 }
 
 model PeerReview {
@@ -212,10 +219,17 @@ model Organization {
   slug        String               @unique
   description String?
   ownerId     String?
-  members     OrganizationMember[]
+  members     Member[]
+  orgMembers  OrganizationMember[]
   challenges  Challenge[]
   teamTracks  TeamTrack[]
   createdAt   DateTime             @default(now())
+  logo        String?
+  metadata    String?
+  invitations Invitation[]
+  topics      Topic[]
+
+  @@map("organization")
 }
 
 model TeamTrack {
@@ -274,23 +288,79 @@ model StudentProgress {
 }
 
 model Courses {
-  id        String   @unique @default(cuid())
-  name      String
+  id          String    @unique @default(cuid())
+  name        String
   description String
-  lessons   Lessons[]
-  creatorId String
-  creator   User     @relation(fields: [creatorId], references: [id])
-
+  lessons     Lessons[]
+  creatorId   String
+  creator     User      @relation(fields: [creatorId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Lessons {
-  id        String   @unique @default(cuid())
-  name      String
-  courseId  String
-  course    Courses @relation(fields: [courseId], references: [id])
-  content   String
+  id       String  @unique @default(cuid())
+  name     String
+  courseId String
+  course   Courses @relation(fields: [courseId], references: [id])
+  content  String
 
+}
+
+model Member {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String       @default("member")
+  createdAt      DateTime
+
+  @@index([organizationId])
+  @@index([userId])
+  @@map("member")
+}
+
+model Invitation {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?
+  status         String       @default("pending")
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  inviterId      String
+  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("invitation")
+}
+
+// ─── AI-generated topics ──────────────────────────────────────────────────────
+// Free users get MAX_FREE_TOPICS (3) AI-generated topics total, across all orgs.
+// The UI enforces this by counting prisma.topic where aiGenerated=true and creatorId=userId.
+// Content is a structured JSON string with sections, conceptMap, notes, visualizations, quiz.
+
+model Topic {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creatorId      String
+  creator        User         @relation("TopicCreator", fields: [creatorId], references: [id])
+
+  title       String
+  subject     String   // raw topic the user typed, e.g. "React Server Components"
+  aiGenerated Boolean  @default(false)
+  // Full structured content blob (JSON string)
+  content     String   @default("{}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([creatorId])
+  @@map("topic")
 }

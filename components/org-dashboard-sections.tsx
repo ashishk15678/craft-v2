@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useOrg, canTeachInOrg, canAdminOrg } from "@/contexts/org-context";
+import { useOrg } from "@/contexts/org-context";
+import { canTeach } from "@/lib/rbac";
 
 // ─── Org section ──────────────────────────────────────────────────────────────
 // Only shown to users who can actually manage orgs (ORG_OWNER, ORG_ADMIN,
@@ -10,18 +11,18 @@ import { useOrg, canTeachInOrg, canAdminOrg } from "@/contexts/org-context";
 
 export function OrgDashboardSection() {
   const org = useOrg();
-  const { memberships, currentOrg } = org;
+  const { orgs, currentOrg } = org;
 
   // Gate: must be able to admin at least one org
-  if (!canAdminOrg(org)) return null;
-  if (memberships.length === 0) return null;
+  // if (!canAdminOrg(org)) return null;
+  if (orgs.length === 0) return null;
 
   return (
     <section className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-center justify-between mb-3">
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-400">
           Organizations
-        </p>
+        </p>s
         <Link
           href="/dashboard/admin"
           className="font-mono text-[10px] uppercase text-zinc-500 hover:text-indigo-400 transition-colors"
@@ -30,8 +31,8 @@ export function OrgDashboardSection() {
         </Link>
       </div>
       <div className="flex flex-wrap gap-2">
-        {memberships.map((m) => {
-          const isActive = currentOrg?.id === m.organization.id;
+        {orgs.map((m) => {
+          const isActive = currentOrg?.id === m.id;
           return (
             <Link
               key={m.id}
@@ -43,10 +44,10 @@ export function OrgDashboardSection() {
               }`}
             >
               <p className="font-mono text-xs font-bold uppercase text-text group-hover:text-indigo-400 transition-colors">
-                {m.organization.name}
+                {m.name}
               </p>
               <p className="mt-0.5 font-mono text-[10px] uppercase text-indigo-400">
-                {m.role.replace(/_/g, " ")}
+                {/*{m..replace(/_/g, " ")}*/}
               </p>
             </Link>
           );
@@ -60,7 +61,7 @@ export function OrgDashboardSection() {
 
 export function OrgAwareRoleGateway() {
   const org = useOrg();
-  const { globalRole, currentOrgRole } = org;
+  const { globalRole , currentOrg } = org;
 
   const workspaces: { title: string; href: string; desc: string; badge?: string }[] = [];
 
@@ -72,14 +73,14 @@ export function OrgAwareRoleGateway() {
     workspaces.push({ title: "Platform",    href: "/dashboard/platform",    desc: "Moderate challenges and govern users.", badge: "superadmin" });
   }
 
-  if (canTeachInOrg(org) && !workspaces.some(w => w.href === "/dashboard/teach")) {
-    workspaces.push({ title: "Teaching Studio", href: "/dashboard/teach", desc: "Author challenges and review submissions." });
-  }
+  // if (canTeach(org) && !workspaces.some(w => w.href === "/dashboard/teach")) {
+  //   workspaces.push({ title: "Teaching Studio", href: "/dashboard/teach", desc: "Author challenges and review submissions." });
+  // }
 
   // Only show org management link to actual admins
-  if (canAdminOrg(org) && !workspaces.some(w => w.href === "/dashboard/admin")) {
-    workspaces.push({ title: "Org Management", href: "/dashboard/admin", desc: "Manage members, tracks, and org settings." });
-  }
+  // if (isAdmin(org) && !workspaces.some(w => w.href === "/dashboard/admin")) {
+  //   workspaces.push({ title: "Org Management", href: "/dashboard/admin", desc: "Manage members, tracks, and org settings." });
+  // }
 
   if (workspaces.length === 0) return null;
 
@@ -89,9 +90,9 @@ export function OrgAwareRoleGateway() {
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-400">
           Your workspaces
         </p>
-        {currentOrgRole && (
+        {currentOrg && (
           <span className="rounded-full bg-indigo-500/20 px-2 py-0.5 font-mono text-[9px] uppercase text-indigo-300">
-            {currentOrgRole.replace(/_/g, " ")} in current org
+            {currentOrg.name}
           </span>
         )}
       </div>

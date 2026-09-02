@@ -20,9 +20,9 @@ export function OrgSwitcher() {
   // Not inside OrgProvider (unauthenticated / non-protected page) – render nothing
   if (!orgCtx) return null;
 
-  const { memberships, currentOrg, switchOrg } = orgCtx;
+  const { currentOrg, switchOrg ,orgs } = orgCtx;
 
-  if (memberships.length === 0) return null;
+  if (!currentOrg) return null;
 
   function handleSelect(orgId: string) {
     switchOrg(orgId);
@@ -42,15 +42,15 @@ export function OrgSwitcher() {
       <DropdownMenu placement="bottom start">
         <DropdownMenuLabel>Organizations</DropdownMenuLabel>
         <DropdownMenuGroup>
-          {memberships.map((m) => (
+          {orgs.map((m) => (
             <DropdownMenuItem
-              key={m.organizationId}
-              textValue={m.organization.name}
-              onAction={() => handleSelect(m.organizationId)}
+              key={m.id}
+              textValue={m.name}
+              onAction={() => handleSelect(m.id)}
             >
               <span className="flex items-center justify-between w-full gap-2">
-                <span>{m.organization.name}</span>
-                {currentOrg?.id === m.organization.id && (
+                <span>{m.name}</span>
+                {currentOrg?.id === m.id && (
                   <span className="font-mono text-[10px] text-indigo-400">active</span>
                 )}
               </span>
