@@ -95,9 +95,11 @@ model User {
   organizationMemberships OrganizationMember[]
   auditLogs               AuditLog[]           @relation("AuditActor")
 
-  members     Member[]
-  invitations Invitation[]
-  topics      Topic[]      @relation("TopicCreator")
+  members          Member[]
+  invitations      Invitation[]
+  topics           Topic[]             @relation("TopicCreator")
+  trackEnrollments TrackEnrollment[]
+  trackProgress    TrackItemProgress[]
 
   @@unique([email])
   @@unique([username])
@@ -300,7 +302,6 @@ model Lessons {
   courseId String
   course   Courses @relation(fields: [courseId], references: [id])
   content  String
-
 }
 
 model Member {
@@ -347,10 +348,10 @@ model Topic {
   creator        User         @relation("TopicCreator", fields: [creatorId], references: [id])
 
   title       String
-  subject     String   // raw topic the user typed, e.g. "React Server Components"
-  aiGenerated Boolean  @default(false)
+  subject     String // raw topic the user typed, e.g. "React Server Components"
+  aiGenerated Boolean @default(false)
   // Full structured content blob (JSON string)
-  content     String   @default("{}")
+  content     String  @default("{}")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -358,4 +359,79 @@ model Topic {
   @@index([organizationId])
   @@index([creatorId])
   @@map("topic")
+}
+
+model Track {
+  id          String  @id @default(cuid())
+  title       String
+  description String
+  imageUrl    String?
+  category    String?
+  isPublic    Boolean @default(true)
+
+  modules     TrackModule[]
+  enrollments TrackEnrollment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TrackModule {
+  id          String  @id @default(cuid())
+  trackId     String
+  track       Track   @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  order       Int     @default(0)
+
+  items TrackItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TrackItem {
+  id       String      @id @default(cuid())
+  moduleId String
+  module   TrackModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title    String
+  type     String // e.g. "MCQ", "PUZZLE", "CODING", "TEXT"
+  content  String // Instructions, text, or markdown
+  order    Int         @default(0)
+
+  // optional for MCQ/Puzzle
+  data String? // JSON string containing options, correct answer, etc.
+
+  progress TrackItemProgress[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TrackEnrollment {
+  id      String @id @default(cuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackId String
+  track   Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, trackId])
+}
+
+model TrackItemProgress {
+  id     String    @id @default(cuid())
+  userId String
+  user   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemId String
+  item   TrackItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  completed Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, itemId])
 }

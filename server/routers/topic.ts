@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { router, authedProcedure } from "@/server/trpc";
+import { router, protectedProcedure } from "@/server/trpc";
 
 const MAX_FREE = Number(process.env.MAX_FREE_TOPICS ?? 3);
 
 export const topicRouter = router({
   /** List all topics the user created, optionally filtered to one org. */
-  list: authedProcedure
+  list: protectedProcedure
     .input(z.object({ organizationId: z.string().optional() }))
     .query(async ({ ctx, input }) => {
       return ctx.prisma.topic.findMany({
@@ -28,7 +28,7 @@ export const topicRouter = router({
     }),
 
   /** Return the full content of a single topic. */
-  get: authedProcedure
+  get: protectedProcedure
     .input(z.object({ topicId: z.string() }))
     .query(async ({ ctx, input }) => {
       const topic = await ctx.prisma.topic.findUnique({
@@ -42,7 +42,7 @@ export const topicRouter = router({
     }),
 
   /** How many AI topics the current user has already generated. */
-  freeUsage: authedProcedure.query(async ({ ctx }) => {
+  freeUsage: protectedProcedure.query(async ({ ctx }) => {
     const used = await ctx.prisma.topic.count({
       where: { creatorId: ctx.user.id, aiGenerated: true },
     });
@@ -50,7 +50,7 @@ export const topicRouter = router({
   }),
 
   /** Delete a topic the user owns. */
-  delete: authedProcedure
+  delete: protectedProcedure
     .input(z.object({ topicId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const topic = await ctx.prisma.topic.findUnique({

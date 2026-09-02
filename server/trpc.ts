@@ -3,7 +3,7 @@ import { cache } from "react";
 import superjson from "superjson";
 import { getSession, type AuthUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { hasGlobalRole, hasOrgRole, type GlobalRole } from "@/lib/rbac";
+import { hasGlobalRole, type GlobalRole } from "@/lib/rbac";
 
 export type Context = {
   user: AuthUser | null;
@@ -15,22 +15,18 @@ export const createContext = cache(async (): Promise<Context> => {
   return { user, prisma };
 });
 
-// Init
 const t = initTRPC.context<Context>().create({ transformer: superjson });
 
 export const router = t.router;
 export const publicProcedure = t.procedure;
-
-// ─── Auth middleware ───────────────────────────────────────────────────────────
 
 const isAuthed = t.middleware(({ ctx, next }) => {
   if (!ctx.user) throw new TRPCError({ code: "UNAUTHORIZED" });
   return next({ ctx: { ...ctx, user: ctx.user } });
 });
 
-export const authedProcedure = t.procedure.use(isAuthed);
+export const protectedProcedure = t.procedure.use(isAuthed);
 
-/** Require a minimum global role */
 export function requireGlobalRole(min: GlobalRole) {
   return isAuthed.unstable_pipe(({ ctx, next }) => {
     if (!hasGlobalRole(ctx.user.role, min)) {
@@ -43,11 +39,8 @@ export function requireGlobalRole(min: GlobalRole) {
 export const adminProcedure = t.procedure.use(requireGlobalRole("ADMIN"));
 export const superadminProcedure = t.procedure.use(requireGlobalRole("SUPERADMIN"));
 
-/**
- * Org-scoped procedure — injects the caller's OrgMember row.
- * Input must include { organizationId: string }.
- */
-export const orgProcedure = authedProcedure.use(async ({ ctx, input: rawInput, next }) => {
+
+export const orgProcedure = protectedProcedure.use(async ({ ctx, input: rawInput, next }) => {
   const input = rawInput as { organizationId?: string };
   if (!input.organizationId) throw new TRPCError({ code: "BAD_REQUEST", message: "organizationId required" });
 
@@ -56,7 +49,6 @@ export const orgProcedure = authedProcedure.use(async ({ ctx, input: rawInput, n
     include: { organization: true },
   });
 
-  // ADMIN+ can always act on any org even without membership
   if (!member && !hasGlobalRole(ctx.user.role, "ADMIN")) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Not a member of this organization" });
   }
