@@ -9,6 +9,7 @@
     "lint": "eslint",
     "format": "prettier --write .",
     "db:migrate": "prisma migrate deploy",
+    "db:seed:tests": "npx tsx seeds/seed-tests.ts",
     "db:seed:practice": "node seeds/seed-practice.mjs",
     "db:setup:practice": "npm run db:migrate && npm run db:seed:practice"
   },

@@ -455,6 +455,8 @@ model PracticeChallenge {
   interaction String // JSON: safe client interaction configuration + server-only answer
   rewardXp    Int      @default(100)
   published   Boolean  @default(true)
+  // Teacher who authored this question (null = seeded/platform content)
+  authorId    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -506,6 +508,10 @@ model Assessment {
   questionIds String // JSON array of PracticeChallenge ids
   rewardXp    Int                 @default(150)
   published   Boolean             @default(true)
+  // Scoped to an org (null = platform-wide, visible to all)
+  orgId       String?
+  // Teacher who created this assessment
+  authorId    String?
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   attempts    AssessmentAttempt[]
@@ -522,6 +528,10 @@ model AssessmentAttempt {
   submittedAt  DateTime?
   startedAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+  // JSON: [{event: string, ts: number}] — tab switches, blur, right-click, etc.
+  violations   String     @default("[]")
+  // True when the timer expired and the server auto-submitted
+  autoSubmitted Boolean   @default(false)
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
 
