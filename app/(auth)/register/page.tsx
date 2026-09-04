@@ -237,9 +237,7 @@ export default function RegisterPage() {
               >
                 <span className="relative z-10 flex items-center justify-center gap-2 font-mono uppercase tracking-wider">
                   {isSubmitted ? (
-                    <>
-                      Registering...
-                    </>
+                    <>Registering...</>
                   ) : step === 2 ? (
                     <>Register ➔</>
                   ) : (
@@ -249,8 +247,6 @@ export default function RegisterPage() {
               </button>
             </div>
           </form>
-
-
         </div>
       </div>
       <p className="px-4 py-2 text-center text-xs text-zinc-400">

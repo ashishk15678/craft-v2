@@ -61,7 +61,9 @@ export default async function TopicDetailPage({
             All topics
           </Link>
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-2xl font-black tracking-tight">{topic.title}</h1>
+            <h1 className="text-2xl font-black tracking-tight">
+              {topic.title}
+            </h1>
             {topic.aiGenerated && (
               <span className="flex items-center gap-1 rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-xs font-bold text-indigo-400 ring-1 ring-indigo-500/20">
                 <Sparkles className="h-3 w-3" aria-hidden />

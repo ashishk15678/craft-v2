@@ -96,7 +96,10 @@ async function main() {
   // ─── Organizations ─────────────────────────────────────────────────────────
   const craftLabs = await prisma.organization.upsert({
     where: { slug: "craft-labs" },
-    update: { ownerId: "seed-admin", description: "The flagship Craft internal engineering org." },
+    update: {
+      ownerId: "seed-admin",
+      description: "The flagship Craft internal engineering org.",
+    },
     create: {
       id: "seed-org",
       name: "Craft Labs",
@@ -108,7 +111,10 @@ async function main() {
 
   const aiBrigade = await prisma.organization.upsert({
     where: { slug: "ai-brigade" },
-    update: { ownerId: "seed-teacher", description: "ML engineers shipping vector databases and RAG pipelines." },
+    update: {
+      ownerId: "seed-teacher",
+      description: "ML engineers shipping vector databases and RAG pipelines.",
+    },
     create: {
       id: "seed-org-2",
       name: "AI Brigade",
@@ -120,37 +126,104 @@ async function main() {
 
   const devOpsGuild = await prisma.organization.upsert({
     where: { slug: "devops-guild" },
-    update: { ownerId: "seed-student", description: "Infra builders focused on containers, networking, and reliability." },
+    update: {
+      ownerId: "seed-student",
+      description:
+        "Infra builders focused on containers, networking, and reliability.",
+    },
     create: {
       id: "seed-org-3",
       name: "DevOps Guild",
       slug: "devops-guild",
-      description: "Infra builders focused on containers, networking, and reliability.",
+      description:
+        "Infra builders focused on containers, networking, and reliability.",
       ownerId: "seed-student",
     },
   });
 
   // ─── Org memberships ───────────────────────────────────────────────────────
-  const memberships: { orgId: string; userId: string; orgRole: string; membershipId: string }[] = [
+  const memberships: {
+    orgId: string;
+    userId: string;
+    orgRole: string;
+    membershipId: string;
+  }[] = [
     // Craft Labs
-    { orgId: craftLabs.id, userId: "seed-admin",     orgRole: "ORG_OWNER",  membershipId: "m-craft-admin" },
-    { orgId: craftLabs.id, userId: "seed-teacher",   orgRole: "INSTRUCTOR", membershipId: "m-craft-mira" },
-    { orgId: craftLabs.id, userId: "seed-student",   orgRole: "LEARNER",    membershipId: "m-craft-dev" },
-    { orgId: craftLabs.id, userId: "seed-student-2", orgRole: "LEARNER",    membershipId: "m-craft-priya" },
+    {
+      orgId: craftLabs.id,
+      userId: "seed-admin",
+      orgRole: "ORG_OWNER",
+      membershipId: "m-craft-admin",
+    },
+    {
+      orgId: craftLabs.id,
+      userId: "seed-teacher",
+      orgRole: "INSTRUCTOR",
+      membershipId: "m-craft-mira",
+    },
+    {
+      orgId: craftLabs.id,
+      userId: "seed-student",
+      orgRole: "LEARNER",
+      membershipId: "m-craft-dev",
+    },
+    {
+      orgId: craftLabs.id,
+      userId: "seed-student-2",
+      orgRole: "LEARNER",
+      membershipId: "m-craft-priya",
+    },
     // AI Brigade
-    { orgId: aiBrigade.id, userId: "seed-teacher",   orgRole: "ORG_OWNER",  membershipId: "m-ai-mira" },
-    { orgId: aiBrigade.id, userId: "seed-student-3", orgRole: "LEARNER",    membershipId: "m-ai-lucas" },
-    { orgId: aiBrigade.id, userId: "seed-student",   orgRole: "LEARNER",    membershipId: "m-ai-dev" },
+    {
+      orgId: aiBrigade.id,
+      userId: "seed-teacher",
+      orgRole: "ORG_OWNER",
+      membershipId: "m-ai-mira",
+    },
+    {
+      orgId: aiBrigade.id,
+      userId: "seed-student-3",
+      orgRole: "LEARNER",
+      membershipId: "m-ai-lucas",
+    },
+    {
+      orgId: aiBrigade.id,
+      userId: "seed-student",
+      orgRole: "LEARNER",
+      membershipId: "m-ai-dev",
+    },
     // DevOps Guild
-    { orgId: devOpsGuild.id, userId: "seed-student",   orgRole: "ORG_OWNER",  membershipId: "m-dg-dev" },
-    { orgId: devOpsGuild.id, userId: "seed-student-3", orgRole: "ORG_ADMIN",  membershipId: "m-dg-lucas" },
-    { orgId: devOpsGuild.id, userId: "seed-student-2", orgRole: "LEARNER",    membershipId: "m-dg-priya" },
-    { orgId: devOpsGuild.id, userId: "seed-admin",     orgRole: "INSTRUCTOR", membershipId: "m-dg-jordan" },
+    {
+      orgId: devOpsGuild.id,
+      userId: "seed-student",
+      orgRole: "ORG_OWNER",
+      membershipId: "m-dg-dev",
+    },
+    {
+      orgId: devOpsGuild.id,
+      userId: "seed-student-3",
+      orgRole: "ORG_ADMIN",
+      membershipId: "m-dg-lucas",
+    },
+    {
+      orgId: devOpsGuild.id,
+      userId: "seed-student-2",
+      orgRole: "LEARNER",
+      membershipId: "m-dg-priya",
+    },
+    {
+      orgId: devOpsGuild.id,
+      userId: "seed-admin",
+      orgRole: "INSTRUCTOR",
+      membershipId: "m-dg-jordan",
+    },
   ];
 
   for (const m of memberships) {
     await prisma.organizationMember.upsert({
-      where: { organizationId_userId: { organizationId: m.orgId, userId: m.userId } },
+      where: {
+        organizationId_userId: { organizationId: m.orgId, userId: m.userId },
+      },
       update: { role: m.orgRole },
       create: {
         id: m.membershipId,
@@ -167,7 +240,8 @@ async function main() {
       id: "seed-kv-store",
       slug: "build-your-own-kv-store",
       title: "Build Your Own KV Store",
-      summary: "Build a persistent networked key/value store one observable milestone at a time.",
+      summary:
+        "Build a persistent networked key/value store one observable milestone at a time.",
       track: "DevOps & Infra",
       status: "PUBLISHED" as const,
       access: "OPEN" as const,
@@ -181,7 +255,8 @@ async function main() {
       id: "seed-vector-db",
       slug: "build-your-own-vector-database",
       title: "Build Your Own Vector Database",
-      summary: "Implement embeddings, similarity search, and durable vector segments.",
+      summary:
+        "Implement embeddings, similarity search, and durable vector segments.",
       track: "AI & ML Engineering",
       status: "PUBLISHED" as const,
       access: "PAID" as const,
@@ -195,7 +270,8 @@ async function main() {
       id: "seed-oauth",
       slug: "build-your-own-oauth-server",
       title: "Build an OAuth2 Server",
-      summary: "Implement secure authorization flows, signing keys, and refresh rotation.",
+      summary:
+        "Implement secure authorization flows, signing keys, and refresh rotation.",
       track: "Fintech & Security",
       status: "REVIEW" as const,
       access: "PRIVATE" as const,
@@ -209,7 +285,8 @@ async function main() {
       id: "seed-mini-docker",
       slug: "build-your-own-container-runtime",
       title: "Build a Container Runtime",
-      summary: "Implement cgroups, namespaces, and overlay filesystems from scratch.",
+      summary:
+        "Implement cgroups, namespaces, and overlay filesystems from scratch.",
       track: "DevOps & Infra",
       status: "DRAFT" as const,
       access: "OPEN" as const,
@@ -222,22 +299,79 @@ async function main() {
   ];
 
   for (const c of challenges) {
-    await prisma.challenge.upsert({ where: { id: c.id }, update: c, create: c });
+    await prisma.challenge.upsert({
+      where: { id: c.id },
+      update: c,
+      create: c,
+    });
   }
 
   // ─── Challenge Stages (KV Store) ───────────────────────────────────────────
   const kvStages = [
-    { id: "seed-kv-1", challengeId: "seed-kv-store", position: 1, title: "PING", brief: "Expose a health command over a TCP connection.", hint: "Keep parsing and command handling separate.", testCommand: "craft test --stage 1" },
-    { id: "seed-kv-2", challengeId: "seed-kv-store", position: 2, title: "GET / SET", brief: "Store and retrieve string keys in memory.", hint: "Start with one map behind a tiny storage interface.", testCommand: "craft test --stage 2" },
-    { id: "seed-kv-3", challengeId: "seed-kv-store", position: 3, title: "Persistence", brief: "Retain values safely across process restarts.", hint: "Append before acknowledging a write.", testCommand: "craft test --stage 3" },
-    { id: "seed-kv-4", challengeId: "seed-kv-store", position: 4, title: "Indexes", brief: "Add indexes without changing the command boundary.", hint: "Make index rebuilding a deterministic startup concern.", testCommand: "craft test --stage 4" },
-    { id: "seed-kv-5", challengeId: "seed-kv-store", position: 5, title: "Query planner", brief: "Plan scans against available indexes.", hint: "Describe a query before executing it.", testCommand: "craft test --stage 5" },
-    { id: "seed-kv-6", challengeId: "seed-kv-store", position: 6, title: "Benchmarks", brief: "Run the standard load harness and submit proof.", hint: "Measure p99 and memory as well as throughput.", testCommand: "craft test --stage 6" },
+    {
+      id: "seed-kv-1",
+      challengeId: "seed-kv-store",
+      position: 1,
+      title: "PING",
+      brief: "Expose a health command over a TCP connection.",
+      hint: "Keep parsing and command handling separate.",
+      testCommand: "craft test --stage 1",
+    },
+    {
+      id: "seed-kv-2",
+      challengeId: "seed-kv-store",
+      position: 2,
+      title: "GET / SET",
+      brief: "Store and retrieve string keys in memory.",
+      hint: "Start with one map behind a tiny storage interface.",
+      testCommand: "craft test --stage 2",
+    },
+    {
+      id: "seed-kv-3",
+      challengeId: "seed-kv-store",
+      position: 3,
+      title: "Persistence",
+      brief: "Retain values safely across process restarts.",
+      hint: "Append before acknowledging a write.",
+      testCommand: "craft test --stage 3",
+    },
+    {
+      id: "seed-kv-4",
+      challengeId: "seed-kv-store",
+      position: 4,
+      title: "Indexes",
+      brief: "Add indexes without changing the command boundary.",
+      hint: "Make index rebuilding a deterministic startup concern.",
+      testCommand: "craft test --stage 4",
+    },
+    {
+      id: "seed-kv-5",
+      challengeId: "seed-kv-store",
+      position: 5,
+      title: "Query planner",
+      brief: "Plan scans against available indexes.",
+      hint: "Describe a query before executing it.",
+      testCommand: "craft test --stage 5",
+    },
+    {
+      id: "seed-kv-6",
+      challengeId: "seed-kv-store",
+      position: 6,
+      title: "Benchmarks",
+      brief: "Run the standard load harness and submit proof.",
+      hint: "Measure p99 and memory as well as throughput.",
+      testCommand: "craft test --stage 6",
+    },
   ];
 
   for (const s of kvStages) {
     await prisma.challengeStage.upsert({
-      where: { challengeId_position: { challengeId: s.challengeId, position: s.position } },
+      where: {
+        challengeId_position: {
+          challengeId: s.challengeId,
+          position: s.position,
+        },
+      },
       update: s,
       create: s,
     });
@@ -245,44 +379,105 @@ async function main() {
 
   // ─── Enrollments ────────────────────────────────────────────────────────────
   const enrollment = await prisma.enrollment.upsert({
-    where: { userId_challengeId: { userId: "seed-student", challengeId: "seed-kv-store" } },
+    where: {
+      userId_challengeId: {
+        userId: "seed-student",
+        challengeId: "seed-kv-store",
+      },
+    },
     update: {},
-    create: { id: "seed-enrollment", userId: "seed-student", challengeId: "seed-kv-store", language: "TypeScript", currentStage: 4 },
+    create: {
+      id: "seed-enrollment",
+      userId: "seed-student",
+      challengeId: "seed-kv-store",
+      language: "TypeScript",
+      currentStage: 4,
+    },
   });
 
   const enrollment2 = await prisma.enrollment.upsert({
-    where: { userId_challengeId: { userId: "seed-student-2", challengeId: "seed-kv-store" } },
+    where: {
+      userId_challengeId: {
+        userId: "seed-student-2",
+        challengeId: "seed-kv-store",
+      },
+    },
     update: {},
-    create: { id: "seed-enrollment-2", userId: "seed-student-2", challengeId: "seed-kv-store", language: "Python", currentStage: 2 },
+    create: {
+      id: "seed-enrollment-2",
+      userId: "seed-student-2",
+      challengeId: "seed-kv-store",
+      language: "Python",
+      currentStage: 2,
+    },
   });
 
   const enrollment3 = await prisma.enrollment.upsert({
-    where: { userId_challengeId: { userId: "seed-student-3", challengeId: "seed-vector-db" } },
+    where: {
+      userId_challengeId: {
+        userId: "seed-student-3",
+        challengeId: "seed-vector-db",
+      },
+    },
     update: {},
-    create: { id: "seed-enrollment-3", userId: "seed-student-3", challengeId: "seed-vector-db", language: "Go", currentStage: 3 },
+    create: {
+      id: "seed-enrollment-3",
+      userId: "seed-student-3",
+      challengeId: "seed-vector-db",
+      language: "Go",
+      currentStage: 3,
+    },
   });
 
   // ─── Benchmarks ─────────────────────────────────────────────────────────────
-  if (!(await prisma.benchmark.findUnique({ where: { id: "seed-benchmark" } }))) {
+  if (
+    !(await prisma.benchmark.findUnique({ where: { id: "seed-benchmark" } }))
+  ) {
     await prisma.benchmark.create({
-      data: { id: "seed-benchmark", enrollmentId: enrollment.id, requestsPerSecond: 42000, p99LatencyMs: 18.4, memoryMb: 92 },
+      data: {
+        id: "seed-benchmark",
+        enrollmentId: enrollment.id,
+        requestsPerSecond: 42000,
+        p99LatencyMs: 18.4,
+        memoryMb: 92,
+      },
     });
   }
-  if (!(await prisma.benchmark.findUnique({ where: { id: "seed-benchmark-2" } }))) {
+  if (
+    !(await prisma.benchmark.findUnique({ where: { id: "seed-benchmark-2" } }))
+  ) {
     await prisma.benchmark.create({
-      data: { id: "seed-benchmark-2", enrollmentId: enrollment3.id, requestsPerSecond: 28500, p99LatencyMs: 24.1, memoryMb: 134 },
+      data: {
+        id: "seed-benchmark-2",
+        enrollmentId: enrollment3.id,
+        requestsPerSecond: 28500,
+        p99LatencyMs: 24.1,
+        memoryMb: 134,
+      },
     });
   }
 
   // ─── Peer reviews ───────────────────────────────────────────────────────────
   if (!(await prisma.peerReview.findUnique({ where: { id: "seed-review" } }))) {
     await prisma.peerReview.create({
-      data: { id: "seed-review", enrollmentId: enrollment.id, status: "REQUESTED", notes: "Persistence boundary ready for architecture review." },
+      data: {
+        id: "seed-review",
+        enrollmentId: enrollment.id,
+        status: "REQUESTED",
+        notes: "Persistence boundary ready for architecture review.",
+      },
     });
   }
-  if (!(await prisma.peerReview.findUnique({ where: { id: "seed-review-2" } }))) {
+  if (
+    !(await prisma.peerReview.findUnique({ where: { id: "seed-review-2" } }))
+  ) {
     await prisma.peerReview.create({
-      data: { id: "seed-review-2", enrollmentId: enrollment2.id, status: "REQUESTED", notes: "Stage 2 complete, checking for idiomatic storage separation." },
+      data: {
+        id: "seed-review-2",
+        enrollmentId: enrollment2.id,
+        status: "REQUESTED",
+        notes: "Stage 2 complete, checking for idiomatic storage separation.",
+      },
     });
   }
 
@@ -304,14 +499,48 @@ async function main() {
 
   // ─── Team tracks ────────────────────────────────────────────────────────────
   const teamTracks = [
-    { id: "seed-tt-1", organizationId: craftLabs.id, title: "Platform API Foundations", description: "Backend systems challenge path for all new Craft engineers.", challengeId: "seed-kv-store", createdById: "seed-admin" },
-    { id: "seed-tt-2", organizationId: craftLabs.id, title: "Security Onboarding", description: "OAuth2 server challenge as the security engineering onboarding track.", challengeId: "seed-oauth", createdById: "seed-admin" },
-    { id: "seed-tt-3", organizationId: aiBrigade.id, title: "Vector Search Deep Dive", description: "Build a vector database as the core AI onboarding experience.", challengeId: "seed-vector-db", createdById: "seed-teacher" },
-    { id: "seed-tt-4", organizationId: devOpsGuild.id, title: "Infra Bootcamp", description: "KV store as the first milestone in the DevOps Guild onboarding path.", challengeId: "seed-kv-store", createdById: "seed-student" },
+    {
+      id: "seed-tt-1",
+      organizationId: craftLabs.id,
+      title: "Platform API Foundations",
+      description:
+        "Backend systems challenge path for all new Craft engineers.",
+      challengeId: "seed-kv-store",
+      createdById: "seed-admin",
+    },
+    {
+      id: "seed-tt-2",
+      organizationId: craftLabs.id,
+      title: "Security Onboarding",
+      description:
+        "OAuth2 server challenge as the security engineering onboarding track.",
+      challengeId: "seed-oauth",
+      createdById: "seed-admin",
+    },
+    {
+      id: "seed-tt-3",
+      organizationId: aiBrigade.id,
+      title: "Vector Search Deep Dive",
+      description:
+        "Build a vector database as the core AI onboarding experience.",
+      challengeId: "seed-vector-db",
+      createdById: "seed-teacher",
+    },
+    {
+      id: "seed-tt-4",
+      organizationId: devOpsGuild.id,
+      title: "Infra Bootcamp",
+      description:
+        "KV store as the first milestone in the DevOps Guild onboarding path.",
+      challengeId: "seed-kv-store",
+      createdById: "seed-student",
+    },
   ];
 
   for (const tt of teamTracks) {
-    const existing = await prisma.teamTrack.findUnique({ where: { id: tt.id } });
+    const existing = await prisma.teamTrack.findUnique({
+      where: { id: tt.id },
+    });
     if (!existing) {
       await prisma.teamTrack.create({ data: tt });
     }
@@ -319,14 +548,62 @@ async function main() {
 
   // ─── Audit logs ─────────────────────────────────────────────────────────────
   const auditLogs = [
-    { id: "seed-audit-1", actorId: "seed-org-manager", action: "platform.initialized", target: "craft-v2", metadata: JSON.stringify({ source: "seed" }) },
-    { id: "seed-audit-2", actorId: "seed-superadmin", action: "challenge.published", target: "build-your-own-kv-store", metadata: JSON.stringify({ source: "seed" }) },
-    { id: "seed-audit-3", actorId: "seed-superadmin", action: "challenge.published", target: "build-your-own-vector-database", metadata: JSON.stringify({ source: "seed" }) },
-    { id: "seed-audit-4", actorId: "seed-admin", action: "organization.created", target: craftLabs.id, metadata: JSON.stringify({ source: "seed" }) },
-    { id: "seed-audit-5", actorId: "seed-teacher", action: "organization.created", target: aiBrigade.id, metadata: JSON.stringify({ source: "seed" }) },
-    { id: "seed-audit-6", actorId: "seed-student", action: "organization.created", target: devOpsGuild.id, metadata: JSON.stringify({ source: "seed" }) },
-    { id: "seed-audit-7", actorId: "seed-admin", action: "organization.track_created", target: "seed-tt-1", metadata: JSON.stringify({ source: "seed" }) },
-    { id: "seed-audit-8", actorId: "seed-teacher", action: "challenge.submitted_for_review", target: "seed-oauth", metadata: JSON.stringify({ source: "seed" }) },
+    {
+      id: "seed-audit-1",
+      actorId: "seed-org-manager",
+      action: "platform.initialized",
+      target: "craft-v2",
+      metadata: JSON.stringify({ source: "seed" }),
+    },
+    {
+      id: "seed-audit-2",
+      actorId: "seed-superadmin",
+      action: "challenge.published",
+      target: "build-your-own-kv-store",
+      metadata: JSON.stringify({ source: "seed" }),
+    },
+    {
+      id: "seed-audit-3",
+      actorId: "seed-superadmin",
+      action: "challenge.published",
+      target: "build-your-own-vector-database",
+      metadata: JSON.stringify({ source: "seed" }),
+    },
+    {
+      id: "seed-audit-4",
+      actorId: "seed-admin",
+      action: "organization.created",
+      target: craftLabs.id,
+      metadata: JSON.stringify({ source: "seed" }),
+    },
+    {
+      id: "seed-audit-5",
+      actorId: "seed-teacher",
+      action: "organization.created",
+      target: aiBrigade.id,
+      metadata: JSON.stringify({ source: "seed" }),
+    },
+    {
+      id: "seed-audit-6",
+      actorId: "seed-student",
+      action: "organization.created",
+      target: devOpsGuild.id,
+      metadata: JSON.stringify({ source: "seed" }),
+    },
+    {
+      id: "seed-audit-7",
+      actorId: "seed-admin",
+      action: "organization.track_created",
+      target: "seed-tt-1",
+      metadata: JSON.stringify({ source: "seed" }),
+    },
+    {
+      id: "seed-audit-8",
+      actorId: "seed-teacher",
+      action: "challenge.submitted_for_review",
+      target: "seed-oauth",
+      metadata: JSON.stringify({ source: "seed" }),
+    },
   ];
 
   for (const log of auditLogs) {
@@ -345,5 +622,10 @@ async function main() {
 }
 
 main()
-  .catch((e) => { console.error(e); process.exit(1); })
-  .finally(async () => { await prisma.$disconnect(); });
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

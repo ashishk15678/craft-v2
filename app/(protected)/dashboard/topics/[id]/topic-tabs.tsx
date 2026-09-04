@@ -10,11 +10,11 @@ import { TopicQuiz } from "./topic-quiz";
 import { TopicVisualizations } from "./topic-visualizations";
 
 const TABS = [
-  { id: "sections",  label: "Learn",        icon: BookOpen },
-  { id: "map",       label: "Concept map",  icon: Map },
-  { id: "notes",     label: "Notes",        icon: StickyNote },
-  { id: "visuals",   label: "Visualizations", icon: BarChart2 },
-  { id: "quiz",      label: "Quiz",         icon: HelpCircle },
+  { id: "sections", label: "Learn", icon: BookOpen },
+  { id: "map", label: "Concept map", icon: Map },
+  { id: "notes", label: "Notes", icon: StickyNote },
+  { id: "visuals", label: "Visualizations", icon: BarChart2 },
+  { id: "quiz", label: "Quiz", icon: HelpCircle },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -48,11 +48,18 @@ export function TopicTabs({ content }: { content: TopicContent }) {
       </div>
 
       {/* Tab content */}
-      {active === "sections"  && <TopicSections sections={content.sections} />}
-      {active === "map"       && <ConceptMapViewer nodes={content.conceptMap.nodes} edges={content.conceptMap.edges} />}
-      {active === "notes"     && <TopicNotes notes={content.notes} />}
-      {active === "visuals"   && <TopicVisualizations visualizations={content.visualizations} />}
-      {active === "quiz"      && <TopicQuiz questions={content.quiz} />}
+      {active === "sections" && <TopicSections sections={content.sections} />}
+      {active === "map" && (
+        <ConceptMapViewer
+          nodes={content.conceptMap.nodes}
+          edges={content.conceptMap.edges}
+        />
+      )}
+      {active === "notes" && <TopicNotes notes={content.notes} />}
+      {active === "visuals" && (
+        <TopicVisualizations visualizations={content.visualizations} />
+      )}
+      {active === "quiz" && <TopicQuiz questions={content.quiz} />}
     </div>
   );
 }

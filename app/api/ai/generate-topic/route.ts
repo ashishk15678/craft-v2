@@ -68,7 +68,9 @@ export const TopicContentSchema = z.object({
       explanation: z.string(),
     }),
   ),
-  furtherReading: z.array(z.object({ title: z.string(), description: z.string() })),
+  furtherReading: z.array(
+    z.object({ title: z.string(), description: z.string() }),
+  ),
 });
 
 export type TopicContent = z.infer<typeof TopicContentSchema>;
@@ -177,7 +179,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "subject is required" }, { status: 400 });
   }
   if (!organizationId) {
-    return NextResponse.json({ error: "organizationId is required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "organizationId is required" },
+      { status: 400 },
+    );
   }
 
   // Verify org membership
@@ -185,7 +190,10 @@ export async function POST(request: NextRequest) {
     where: { organizationId, userId },
   });
   if (!member) {
-    return NextResponse.json({ error: "Not a member of this organization" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Not a member of this organization" },
+      { status: 403 },
+    );
   }
 
   // Enforce free limit

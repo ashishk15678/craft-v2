@@ -40,21 +40,20 @@ export function TopicQuiz({ questions }: { questions: Question[] }) {
             pct === 100
               ? "border-emerald-500/40 bg-emerald-500/10"
               : pct >= 60
-              ? "border-amber-500/40 bg-amber-500/10"
-              : "border-red-500/40 bg-red-500/10"
+                ? "border-amber-500/40 bg-amber-500/10"
+                : "border-red-500/40 bg-red-500/10"
           }`}
         >
           <div>
             <p className="font-bold text-sm">
-              {score}/{questions.length} correct — {pct}%
-              {pct === 100 && " 🎉"}
+              {score}/{questions.length} correct — {pct}%{pct === 100 && " 🎉"}
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">
               {pct === 100
                 ? "Perfect score!"
                 : pct >= 60
-                ? "Good effort. Review the explanations below."
-                : "Keep studying and try again."}
+                  ? "Good effort. Review the explanations below."
+                  : "Keep studying and try again."}
             </p>
           </div>
           <button
@@ -71,7 +70,8 @@ export function TopicQuiz({ questions }: { questions: Question[] }) {
       {questions.map((q, qi) => {
         const chosen = answers[q.id] ?? null;
         const isCorrect = submitted && chosen === q.correctIndex;
-        const isWrong = submitted && chosen !== null && chosen !== q.correctIndex;
+        const isWrong =
+          submitted && chosen !== null && chosen !== q.correctIndex;
 
         return (
           <div
@@ -81,8 +81,8 @@ export function TopicQuiz({ questions }: { questions: Question[] }) {
                 ? isCorrect
                   ? "border-emerald-500/40"
                   : isWrong
-                  ? "border-red-500/40"
-                  : "border-border opacity-70"
+                    ? "border-red-500/40"
+                    : "border-border opacity-70"
                 : "border-border"
             }`}
           >
@@ -106,10 +106,10 @@ export function TopicQuiz({ questions }: { questions: Question[] }) {
                       isBad
                         ? "border-red-500/60 bg-red-500/10 text-red-400"
                         : isAnswer
-                        ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-400"
-                        : isSelected
-                        ? "border-indigo-500/60 bg-indigo-500/10 text-indigo-400"
-                        : "border-border hover:border-indigo-500/40 hover:bg-accent/50"
+                          ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-400"
+                          : isSelected
+                            ? "border-indigo-500/60 bg-indigo-500/10 text-indigo-400"
+                            : "border-border hover:border-indigo-500/40 hover:bg-accent/50"
                     } disabled:cursor-default`}
                   >
                     <span
@@ -117,13 +117,19 @@ export function TopicQuiz({ questions }: { questions: Question[] }) {
                         isBad
                           ? "border-red-500 text-red-400"
                           : isAnswer
-                          ? "border-emerald-500 text-emerald-400"
-                          : isSelected
-                          ? "border-indigo-500 text-indigo-400"
-                          : "border-border text-muted-foreground"
+                            ? "border-emerald-500 text-emerald-400"
+                            : isSelected
+                              ? "border-indigo-500 text-indigo-400"
+                              : "border-border text-muted-foreground"
                       }`}
                     >
-                      {isBad ? <X className="h-3 w-3" aria-hidden /> : isAnswer ? <Check className="h-3 w-3" aria-hidden /> : String.fromCharCode(65 + oi)}
+                      {isBad ? (
+                        <X className="h-3 w-3" aria-hidden />
+                      ) : isAnswer ? (
+                        <Check className="h-3 w-3" aria-hidden />
+                      ) : (
+                        String.fromCharCode(65 + oi)
+                      )}
                     </span>
                     {opt}
                   </button>
@@ -134,7 +140,9 @@ export function TopicQuiz({ questions }: { questions: Question[] }) {
             {/* Explanation */}
             {submitted && (
               <div className="rounded-lg bg-accent px-4 py-3 text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground">Explanation: </span>
+                <span className="font-semibold text-foreground">
+                  Explanation:{" "}
+                </span>
                 {q.explanation}
               </div>
             )}
@@ -149,7 +157,8 @@ export function TopicQuiz({ questions }: { questions: Question[] }) {
           disabled={Object.keys(answers).length < questions.length}
           className="w-full rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 transition-all"
         >
-          Submit answers ({Object.keys(answers).length}/{questions.length} answered)
+          Submit answers ({Object.keys(answers).length}/{questions.length}{" "}
+          answered)
         </button>
       )}
     </div>

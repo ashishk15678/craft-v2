@@ -25,7 +25,11 @@ export function DeleteTopicButton({ topicId }: { topicId: string }) {
           disabled={del.isPending}
           className="flex items-center gap-1 rounded-lg bg-destructive/10 px-3 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/20 transition-colors"
         >
-          {del.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Yes, delete"}
+          {del.isPending ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            "Yes, delete"
+          )}
         </button>
         <button
           onClick={() => setConfirming(false)}

@@ -22,12 +22,7 @@ export type BaOrg = {
 };
 
 export type GlobalRole =
-  | "ORG_MANAGER"
-  | "SUPERADMIN"
-  | "ADMIN"
-  | "EDITOR"
-  | "TEACHER"
-  | "STUDENT";
+  "ORG_MANAGER" | "SUPERADMIN" | "ADMIN" | "EDITOR" | "TEACHER" | "STUDENT";
 
 export type OrgContextValue = {
   /** The currently-active organisation, or undefined if none selected */
@@ -77,7 +72,10 @@ export function OrgProvider({
     initialOrgId ?? orgs[0]?.id,
   );
 
-  const currentOrg = orgs.find((o) => o.id === activeOrgId);
+  const currentOrg =
+    orgs.find((o) => o.id === activeOrgId) ??
+    orgs.find((o) => o.id === initialOrgId) ??
+    orgs[0];
 
   const switchOrg = useCallback((orgId: string) => {
     setActiveOrgId(orgId);

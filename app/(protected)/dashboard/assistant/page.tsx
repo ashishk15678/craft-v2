@@ -1,2 +1,4 @@
 import { DebuggingCompanion } from "@/components/debugging-companion";
-export default function AssistantPage() { return <DebuggingCompanion />; }
+export default function AssistantPage() {
+  return <DebuggingCompanion />;
+}

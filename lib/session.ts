@@ -19,7 +19,14 @@ export async function getSession(): Promise<AuthUser | null> {
   // Always read role from DB — don't trust the session token for role
   const dbUser = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { id: true, name: true, email: true, username: true, role: true, image: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      username: true,
+      role: true,
+      image: true,
+    },
   });
   if (!dbUser) return null;
 

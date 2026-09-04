@@ -59,12 +59,14 @@ export const trackRouter = router({
   getMyLearnings: protectedProcedure.query(async ({ ctx }) => {
     const enrollments = await ctx.prisma.trackEnrollment.findMany({
       where: { userId: ctx.user.id },
+      orderBy: { updatedAt: "desc" },
       include: {
         track: {
           include: {
             modules: {
-              include: {
-                items: true,
+              select: {
+                id: true,
+                items: { select: { id: true } },
               },
             },
           },
@@ -73,11 +75,50 @@ export const trackRouter = router({
     });
 
     const trackProgress = await ctx.prisma.trackItemProgress.findMany({
-      where: { userId: ctx.user.id },
+      where: {
+        userId: ctx.user.id,
+        item: {
+          module: { track: { enrollments: { some: { userId: ctx.user.id } } } },
+        },
+      },
     });
 
     return { enrollments, trackProgress };
   }),
+
+  getLearningById: protectedProcedure
+    .input(z.object({ trackId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const enrollment = await ctx.prisma.trackEnrollment.findUnique({
+        where: {
+          userId_trackId: {
+            userId: ctx.user.id,
+            trackId: input.trackId,
+          },
+        },
+        include: {
+          track: {
+            include: {
+              modules: {
+                orderBy: { order: "asc" },
+                include: { items: { orderBy: { order: "asc" } } },
+              },
+            },
+          },
+        },
+      });
+
+      if (!enrollment) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const trackProgress = await ctx.prisma.trackItemProgress.findMany({
+        where: {
+          userId: ctx.user.id,
+          item: { module: { trackId: input.trackId } },
+        },
+      });
+
+      return { track: enrollment.track, trackProgress };
+    }),
 
   updateProgress: protectedProcedure
     .input(z.object({ itemId: z.string(), completed: z.boolean() }))

@@ -53,11 +53,14 @@ export function GenerateTopicForm({ orgOptions, remaining, max }: Props) {
       const res = await fetch("/api/ai/generate-topic", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject: subject.trim(), organizationId: orgId }),
+        body: JSON.stringify({
+          subject: subject.trim(),
+          organizationId: orgId,
+        }),
       });
 
       setPhase("saving");
-      const data = await res.json() as {
+      const data = (await res.json()) as {
         topic?: { id: string };
         error?: string;
         code?: string;
@@ -65,7 +68,9 @@ export function GenerateTopicForm({ orgOptions, remaining, max }: Props) {
 
       if (!res.ok) {
         if (data.code === "FREE_LIMIT_REACHED") {
-          setError(`You've used all ${max} free AI topics. Upgrade for unlimited access.`);
+          setError(
+            `You've used all ${max} free AI topics. Upgrade for unlimited access.`,
+          );
         } else {
           setError(data.error ?? "Generation failed. Please try again.");
         }

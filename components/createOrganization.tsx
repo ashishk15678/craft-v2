@@ -25,8 +25,8 @@ export default function CreateOrganization({
       .toLowerCase()
       .trim()
       .replace(/[^a-z0-9 -]/g, "") // Remove special characters
-      .replace(/\s+/g, "-")        // Replace spaces with hyphens
-      .replace(/-+/g, "-");        // Remove duplicate hyphens
+      .replace(/\s+/g, "-") // Replace spaces with hyphens
+      .replace(/-+/g, "-"); // Remove duplicate hyphens
   };
 
   useEffect(() => {
@@ -103,11 +103,7 @@ export default function CreateOrganization({
           </button>
         </div>
 
-        {error && (
-          <div className="text-sm text-red-500">
-            {error}
-          </div>
-        )}
+        {error && <div className="text-sm text-red-500">{error}</div>}
 
         <form
           ref={formRef}

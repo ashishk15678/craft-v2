@@ -17,8 +17,10 @@ export default async function TopicsPage() {
 
   const userId = session.user.id;
 
-  const orgs = await auth.api.listOrganizations({ headers:await headers() });
-  const aiCount = await prisma.topic.count({ where: { creatorId: userId, aiGenerated: true } });
+  const orgs = await auth.api.listOrganizations({ headers: await headers() });
+  const aiCount = await prisma.topic.count({
+    where: { creatorId: userId, aiGenerated: true },
+  });
   const remaining = Math.max(0, MAX_FREE - aiCount);
   const orgOptions = orgs.map((m) => m.id);
   const topics = await prisma.topic.findMany({ where: { creatorId: userId } });
@@ -32,8 +34,8 @@ export default async function TopicsPage() {
           AI Topics
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Tell the AI a subject. It generates a complete learning module with notes,
-          a concept map, visualizations, and a quiz — all in seconds.
+          Tell the AI a subject. It generates a complete learning module with
+          notes, a concept map, visualizations, and a quiz — all in seconds.
         </p>
       </div>
 
@@ -60,7 +62,8 @@ export default async function TopicsPage() {
         </div>
         {remaining === 0 ? (
           <p className="mt-2 text-xs text-amber-500 font-medium">
-            You&apos;ve used all {MAX_FREE} free topics. Upgrade for unlimited AI generation.
+            You&apos;ve used all {MAX_FREE} free topics. Upgrade for unlimited
+            AI generation.
           </p>
         ) : (
           <p className="mt-2 text-xs text-muted-foreground">
@@ -78,10 +81,14 @@ export default async function TopicsPage() {
         />
       ) : (
         <div className="rounded-xl border border-dashed border-border p-8 text-center">
-          <BookOpen className="mx-auto mb-3 h-7 w-7 text-muted-foreground/40" aria-hidden />
+          <BookOpen
+            className="mx-auto mb-3 h-7 w-7 text-muted-foreground/40"
+            aria-hidden
+          />
           <p className="text-sm font-medium">Join an organization first</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Topics are created inside organizations. Join or create one to get started.
+            Topics are created inside organizations. Join or create one to get
+            started.
           </p>
           <Link
             href="/dashboard"
@@ -130,7 +137,10 @@ export default async function TopicsPage() {
                       day: "numeric",
                     })}
                   </span>
-                  <ChevronRight className="h-3.5 w-3.5 group-hover:text-indigo-400 transition-colors" aria-hidden />
+                  <ChevronRight
+                    className="h-3.5 w-3.5 group-hover:text-indigo-400 transition-colors"
+                    aria-hidden
+                  />
                 </div>
               </Link>
             ))}

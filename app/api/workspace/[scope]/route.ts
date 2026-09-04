@@ -11,9 +11,22 @@ import { canManageOrgMember } from "@/rbac/permissions";
 
 type Scope = "creator" | "organization" | "platform" | "org-manager";
 const scopes: Scope[] = ["creator", "organization", "platform", "org-manager"];
-const creatorRoles: Role[] = ["TEACHER", "EDITOR", "ADMIN", "SUPERADMIN", "ORG_MANAGER"];
+const creatorRoles: Role[] = [
+  "TEACHER",
+  "EDITOR",
+  "ADMIN",
+  "SUPERADMIN",
+  "ORG_MANAGER",
+];
 // Every authenticated role can access the organization workspace (everyone can create orgs)
-const orgRoles: Role[] = ["STUDENT", "TEACHER", "EDITOR", "ADMIN", "SUPERADMIN", "ORG_MANAGER"];
+const orgRoles: Role[] = [
+  "STUDENT",
+  "TEACHER",
+  "EDITOR",
+  "ADMIN",
+  "SUPERADMIN",
+  "ORG_MANAGER",
+];
 
 function bad(message: string, status = 400) {
   return NextResponse.json({ message }, { status });
@@ -145,32 +158,45 @@ async function organizationDashboard(userId: string, role: Role) {
 }
 
 async function platformDashboard() {
-  const [challengeCounts, userCounts, pendingChallenges, recentAudit, users, orgCount] =
-    await Promise.all([
-      prisma.challenge.groupBy({ by: ["status"], _count: { _all: true } }),
-      prisma.user.groupBy({ by: ["role"], _count: { _all: true } }),
-      prisma.challenge.findMany({
-        where: { status: ChallengeStatus.REVIEW },
-        include: {
-          creator: { select: { name: true, email: true } },
-          _count: { select: { stages: true } },
-        },
-        orderBy: { updatedAt: "asc" },
-        take: 40,
-      }),
-      prisma.auditLog.findMany({
-        include: { actor: { select: { name: true, email: true } } },
-        orderBy: { createdAt: "desc" },
-        take: 25,
-      }),
-      prisma.user.findMany({
-        select: { id: true, name: true, email: true, role: true },
-        orderBy: { createdAt: "desc" },
-        take: 100,
-      }),
-      prisma.organization.count(),
-    ]);
-  return { challengeCounts, userCounts, pendingChallenges, recentAudit, users, orgCount };
+  const [
+    challengeCounts,
+    userCounts,
+    pendingChallenges,
+    recentAudit,
+    users,
+    orgCount,
+  ] = await Promise.all([
+    prisma.challenge.groupBy({ by: ["status"], _count: { _all: true } }),
+    prisma.user.groupBy({ by: ["role"], _count: { _all: true } }),
+    prisma.challenge.findMany({
+      where: { status: ChallengeStatus.REVIEW },
+      include: {
+        creator: { select: { name: true, email: true } },
+        _count: { select: { stages: true } },
+      },
+      orderBy: { updatedAt: "asc" },
+      take: 40,
+    }),
+    prisma.auditLog.findMany({
+      include: { actor: { select: { name: true, email: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 25,
+    }),
+    prisma.user.findMany({
+      select: { id: true, name: true, email: true, role: true },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    }),
+    prisma.organization.count(),
+  ]);
+  return {
+    challengeCounts,
+    userCounts,
+    pendingChallenges,
+    recentAudit,
+    users,
+    orgCount,
+  };
 }
 
 async function orgManagerDashboard() {
@@ -200,7 +226,10 @@ async function orgManagerDashboard() {
   ]);
 
   const totalMembers = organizations.reduce((t, o) => t + o._count.members, 0);
-  const totalTracks = organizations.reduce((t, o) => t + o.teamTracks.length, 0);
+  const totalTracks = organizations.reduce(
+    (t, o) => t + o.teamTracks.length,
+    0,
+  );
   const totalUsers = userCounts.reduce((t, u) => t + u._count._all, 0);
 
   return {
@@ -276,8 +305,7 @@ export async function POST(
     return creatorMutation(body, access.user.id, access.role);
   if (scope === "organization")
     return organizationMutation(body, access.user.id, access.role);
-  if (scope === "org-manager")
-    return orgManagerMutation(body, access.user.id);
+  if (scope === "org-manager") return orgManagerMutation(body, access.user.id);
   return platformMutation(body, access.user.id);
 }
 
@@ -312,7 +340,11 @@ async function creatorMutation(
       validEnum(ChallengeAccess, body.access) ?? ChallengeAccess.OPEN;
     const priceCents =
       access === ChallengeAccess.PAID ? Number(body.priceCents) : 0;
-    if (!Number.isInteger(priceCents) || priceCents < 0 || priceCents > 100000000)
+    if (
+      !Number.isInteger(priceCents) ||
+      priceCents < 0 ||
+      priceCents > 100000000
+    )
       return bad("Invalid price.");
     const baseSlug = slugify(text(body.slug, 100) || title);
     if (!baseSlug) return bad("Title must contain letters or numbers.");
@@ -364,7 +396,8 @@ async function creatorMutation(
       notes = text(body.notes, 2000);
     if (
       !status ||
-      (status !== ReviewStatus.APPROVED && status !== ReviewStatus.CHANGES_REQUESTED)
+      (status !== ReviewStatus.APPROVED &&
+        status !== ReviewStatus.CHANGES_REQUESTED)
     )
       return bad("Choose an approval or changes-requested outcome.");
     const review = await prisma.peerReview.findUnique({
@@ -414,7 +447,8 @@ async function organizationMutation(
         },
       })
       .catch(() => null);
-    if (!organization) return bad("That organization slug is already in use.", 409);
+    if (!organization)
+      return bad("That organization slug is already in use.", 409);
     await audit(userId, "organization.created", organization.id);
     return NextResponse.json(organization, { status: 201 });
   }
@@ -460,7 +494,8 @@ async function organizationMutation(
     const title = text(body.title, 120),
       description = text(body.description, 1000),
       challengeId = text(body.challengeId, 100);
-    if (!title || !description) return bad("Track title and description are required.");
+    if (!title || !description)
+      return bad("Track title and description are required.");
     if (challengeId) {
       const ch = await prisma.challenge.findUnique({
         where: { id: challengeId },
@@ -477,7 +512,9 @@ async function organizationMutation(
         createdById: userId,
       },
     });
-    await audit(userId, "organization.track_created", teamTrack.id, { organizationId });
+    await audit(userId, "organization.track_created", teamTrack.id, {
+      organizationId,
+    });
     return NextResponse.json(teamTrack, { status: 201 });
   }
 
@@ -487,21 +524,35 @@ async function organizationMutation(
     const email = text(body.email, 320).toLowerCase();
     const newOrgRole = text(body.memberRole, 40).toUpperCase();
     if (!email || !isValidOrgRole(newOrgRole))
-      return bad("A valid email and org role (ORG_OWNER/ORG_ADMIN/INSTRUCTOR/LEARNER) are required.");
+      return bad(
+        "A valid email and org role (ORG_OWNER/ORG_ADMIN/INSTRUCTOR/LEARNER) are required.",
+      );
     // Only ORG_OWNER / ORG_MANAGER can assign ORG_OWNER
-    if (newOrgRole === "ORG_OWNER" && callerOrgRole !== "ORG_OWNER" && !isSuperUser)
-      return bad("Only an existing owner or the platform manager can grant ORG_OWNER.", 403);
+    if (
+      newOrgRole === "ORG_OWNER" &&
+      callerOrgRole !== "ORG_OWNER" &&
+      !isSuperUser
+    )
+      return bad(
+        "Only an existing owner or the platform manager can grant ORG_OWNER.",
+        403,
+      );
     const targetUser = await prisma.user.findUnique({
       where: { email },
       select: { id: true },
     });
     if (!targetUser) return bad("No registered user has that email.", 404);
     const member = await prisma.organizationMember.upsert({
-      where: { organizationId_userId: { organizationId, userId: targetUser.id } },
+      where: {
+        organizationId_userId: { organizationId, userId: targetUser.id },
+      },
       update: { role: newOrgRole },
       create: { organizationId, userId: targetUser.id, role: newOrgRole },
     });
-    await audit(userId, "organization.member_upserted", member.id, { organizationId, newOrgRole });
+    await audit(userId, "organization.member_upserted", member.id, {
+      organizationId,
+      newOrgRole,
+    });
     return NextResponse.json(member);
   }
 
@@ -521,7 +572,10 @@ async function organizationMutation(
     const callerLevel = ORG_ROLE_HIERARCHY[callerOrgRole ?? ""] ?? 0;
     const targetCurrentLevel = ORG_ROLE_HIERARCHY[targetMember.role] ?? 0;
     const targetNewLevel = ORG_ROLE_HIERARCHY[newOrgRole] ?? 0;
-    if (!isSuperUser && (targetCurrentLevel >= callerLevel || targetNewLevel >= callerLevel))
+    if (
+      !isSuperUser &&
+      (targetCurrentLevel >= callerLevel || targetNewLevel >= callerLevel)
+    )
       return bad("You cannot change roles at or above your own level.", 403);
     const updated = await prisma.organizationMember.update({
       where: { id: targetMemberId },
@@ -545,21 +599,27 @@ async function organizationMutation(
     if (!targetMember || targetMember.organizationId !== organizationId)
       return bad("Member not found.", 404);
     // Cannot remove yourself
-    if (targetMember.userId === userId) return bad("Cannot remove yourself from the organization.");
+    if (targetMember.userId === userId)
+      return bad("Cannot remove yourself from the organization.");
     // Check hierarchy
     const callerLevel = ORG_ROLE_HIERARCHY[callerOrgRole ?? ""] ?? 0;
     const targetLevel = ORG_ROLE_HIERARCHY[targetMember.role] ?? 0;
     if (!isSuperUser && targetLevel >= callerLevel)
       return bad("You cannot remove a member at or above your own level.", 403);
     await prisma.organizationMember.delete({ where: { id: targetMemberId } });
-    await audit(userId, "organization.member_removed", targetMemberId, { organizationId });
+    await audit(userId, "organization.member_removed", targetMemberId, {
+      organizationId,
+    });
     return NextResponse.json({ removed: true });
   }
 
   // ── Delete organization (owner + ORG_MANAGER only) ────────────────────────
   if (body.action === "deleteOrganization") {
     if (callerOrgRole !== "ORG_OWNER" && !isSuperUser)
-      return bad("Only the org owner or platform manager can delete an org.", 403);
+      return bad(
+        "Only the org owner or platform manager can delete an org.",
+        403,
+      );
     await prisma.organization.delete({ where: { id: organizationId } });
     await audit(userId, "organization.deleted", organizationId);
     return NextResponse.json({ deleted: true });
@@ -570,26 +630,35 @@ async function organizationMutation(
 
 // ─── Org-manager mutations ───────────────────────────────────────────────────
 
-async function orgManagerMutation(body: Record<string, unknown>, userId: string) {
+async function orgManagerMutation(
+  body: Record<string, unknown>,
+  userId: string,
+) {
   // Override any org member's role (global power)
   if (body.action === "setOrgMemberRole") {
     const memberId = text(body.memberId, 100);
     const newOrgRole = text(body.newRole, 40).toUpperCase();
     if (!memberId || !isValidOrgRole(newOrgRole))
       return bad("memberId and a valid newRole are required.");
-    const member = await prisma.organizationMember.update({
-      where: { id: memberId },
-      data: { role: newOrgRole },
-    }).catch(() => null);
+    const member = await prisma.organizationMember
+      .update({
+        where: { id: memberId },
+        data: { role: newOrgRole },
+      })
+      .catch(() => null);
     if (!member) return bad("Member not found.", 404);
-    await audit(userId, "org_manager.member_role_set", memberId, { newOrgRole });
+    await audit(userId, "org_manager.member_role_set", memberId, {
+      newOrgRole,
+    });
     return NextResponse.json(member);
   }
 
   // Force-remove a member from any org
   if (body.action === "forceRemoveMember") {
     const memberId = text(body.memberId, 100);
-    const member = await prisma.organizationMember.findUnique({ where: { id: memberId } });
+    const member = await prisma.organizationMember.findUnique({
+      where: { id: memberId },
+    });
     if (!member) return bad("Member not found.", 404);
     await prisma.organizationMember.delete({ where: { id: memberId } });
     await audit(userId, "org_manager.member_removed", memberId);
@@ -599,7 +668,9 @@ async function orgManagerMutation(body: Record<string, unknown>, userId: string)
   // Force-delete any organization
   if (body.action === "forceDeleteOrganization") {
     const organizationId = text(body.organizationId, 100);
-    const org = await prisma.organization.findUnique({ where: { id: organizationId } });
+    const org = await prisma.organization.findUnique({
+      where: { id: organizationId },
+    });
     if (!org) return bad("Organization not found.", 404);
     await prisma.organization.delete({ where: { id: organizationId } });
     await audit(userId, "org_manager.organization_deleted", organizationId);
@@ -611,12 +682,18 @@ async function orgManagerMutation(body: Record<string, unknown>, userId: string)
     const targetUserId = text(body.userId, 100),
       role = validEnum(ROLE, body.role);
     if (!role) return bad("Choose a valid role.");
-    if (targetUserId === userId) return bad("You cannot change your own ORG_MANAGER role.");
+    if (targetUserId === userId)
+      return bad("You cannot change your own ORG_MANAGER role.");
     // Nobody can be promoted to ORG_MANAGER via this endpoint – that's a direct DB operation
-    if (role === ("ORG_MANAGER" as unknown)) return bad("ORG_MANAGER cannot be assigned via API.");
-    const user = await prisma.user.update({ where: { id: targetUserId }, data: { role } }).catch(() => null);
+    if (role === ("ORG_MANAGER" as unknown))
+      return bad("ORG_MANAGER cannot be assigned via API.");
+    const user = await prisma.user
+      .update({ where: { id: targetUserId }, data: { role } })
+      .catch(() => null);
     if (!user) return bad("User not found.", 404);
-    await audit(userId, "org_manager.user_role_updated", targetUserId, { role });
+    await audit(userId, "org_manager.user_role_updated", targetUserId, {
+      role,
+    });
     return NextResponse.json({ id: user.id, role: user.role });
   }
 
@@ -631,7 +708,9 @@ async function platformMutation(body: Record<string, unknown>, userId: string) {
       status = validEnum(ChallengeStatus, body.status);
     if (
       !status ||
-      (status !== ChallengeStatus.PUBLISHED && status !== ChallengeStatus.ARCHIVED && status !== ChallengeStatus.DRAFT)
+      (status !== ChallengeStatus.PUBLISHED &&
+        status !== ChallengeStatus.ARCHIVED &&
+        status !== ChallengeStatus.DRAFT)
     )
       return bad("Invalid moderation status.");
     const challenge = await prisma.challenge
@@ -645,9 +724,11 @@ async function platformMutation(body: Record<string, unknown>, userId: string) {
   if (body.action === "updateUserRole") {
     const targetUserId = text(body.userId, 100),
       role = validEnum(ROLE, body.role);
-    if (!role || targetUserId === userId) return bad("Choose a valid role for another user.");
+    if (!role || targetUserId === userId)
+      return bad("Choose a valid role for another user.");
     // Superadmin cannot set ORG_MANAGER
-    if ((role as unknown) === "ORG_MANAGER") return bad("ORG_MANAGER cannot be assigned via this endpoint.");
+    if ((role as unknown) === "ORG_MANAGER")
+      return bad("ORG_MANAGER cannot be assigned via this endpoint.");
     const user = await prisma.user
       .update({ where: { id: targetUserId }, data: { role } })
       .catch(() => null);

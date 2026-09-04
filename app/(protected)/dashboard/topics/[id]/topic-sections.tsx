@@ -16,10 +16,16 @@ function MarkdownBody({ text }: { text: string }) {
         const cleaned = line.replace(/^\s*[-*•]\s/, "");
         const rendered = cleaned
           .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-          .replace(/`([^`]+)`/g, "<code class=\"rounded bg-accent px-1 py-0.5 font-mono text-xs text-foreground\">$1</code>");
+          .replace(
+            /`([^`]+)`/g,
+            '<code class="rounded bg-accent px-1 py-0.5 font-mono text-xs text-foreground">$1</code>',
+          );
         return isBullet ? (
           <div key={i} className="flex items-start gap-2">
-            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-400" aria-hidden />
+            <span
+              className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-400"
+              aria-hidden
+            />
             <span dangerouslySetInnerHTML={{ __html: rendered }} />
           </div>
         ) : (
@@ -40,10 +46,17 @@ function SectionCard({ section }: { section: Section }) {
         className="flex w-full items-center gap-3 px-5 py-4 text-left hover:bg-accent/50 transition-colors"
         aria-expanded={open}
       >
-        {open
-          ? <ChevronDown className="h-4 w-4 shrink-0 text-indigo-400" aria-hidden />
-          : <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-        }
+        {open ? (
+          <ChevronDown
+            className="h-4 w-4 shrink-0 text-indigo-400"
+            aria-hidden
+          />
+        ) : (
+          <ChevronRight
+            className="h-4 w-4 shrink-0 text-muted-foreground"
+            aria-hidden
+          />
+        )}
         <span className="font-bold">{section.heading}</span>
       </button>
 
@@ -57,11 +70,16 @@ function SectionCard({ section }: { section: Section }) {
           {/* Key points */}
           {section.keyPoints.length > 0 && (
             <div className="rounded-lg bg-indigo-500/5 border border-indigo-500/20 p-4">
-              <p className="text-xs font-bold uppercase text-indigo-400 mb-2">Key points</p>
+              <p className="text-xs font-bold uppercase text-indigo-400 mb-2">
+                Key points
+              </p>
               <ul className="space-y-1.5">
                 {section.keyPoints.map((kp, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm">
-                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-400" aria-hidden />
+                    <span
+                      className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-400"
+                      aria-hidden
+                    />
                     <span>{kp}</span>
                   </li>
                 ))}
@@ -73,7 +91,10 @@ function SectionCard({ section }: { section: Section }) {
           {section.codeExample && (
             <div className="rounded-lg overflow-hidden border border-border">
               <div className="flex items-center gap-2 border-b border-border bg-accent px-4 py-2">
-                <Code2 className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+                <Code2
+                  className="h-3.5 w-3.5 text-muted-foreground"
+                  aria-hidden
+                />
                 <span className="text-xs font-mono text-muted-foreground">
                   {section.codeExample.language}
                 </span>
@@ -94,7 +115,11 @@ function SectionCard({ section }: { section: Section }) {
   );
 }
 
-export function TopicSections({ sections }: { sections: TopicContent["sections"] }) {
+export function TopicSections({
+  sections,
+}: {
+  sections: TopicContent["sections"];
+}) {
   return (
     <div className="space-y-3">
       {sections.map((s) => (

@@ -22,7 +22,7 @@ export function OrgDashboardSection() {
       <div className="flex items-center justify-between mb-3">
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-400">
           Organizations
-        </p>s
+        </p>
         <Link
           href="/dashboard/admin"
           className="font-mono text-[10px] uppercase text-zinc-500 hover:text-indigo-400 transition-colors"
@@ -61,16 +61,35 @@ export function OrgDashboardSection() {
 
 export function OrgAwareRoleGateway() {
   const org = useOrg();
-  const { globalRole , currentOrg } = org;
+  const { globalRole, currentOrg } = org;
 
-  const workspaces: { title: string; href: string; desc: string; badge?: string }[] = [];
+  const workspaces: {
+    title: string;
+    href: string;
+    desc: string;
+    badge?: string;
+  }[] = [];
 
   if (globalRole === "ORG_MANAGER") {
-    workspaces.push({ title: "Org Manager", href: "/dashboard/org-manager", desc: "Full platform-level org control.", badge: "owner" });
-    workspaces.push({ title: "Platform",    href: "/dashboard/platform",    desc: "Moderate challenges and govern users." });
+    workspaces.push({
+      title: "Org Manager",
+      href: "/dashboard/org-manager",
+      desc: "Full platform-level org control.",
+      badge: "owner",
+    });
+    workspaces.push({
+      title: "Platform",
+      href: "/dashboard/platform",
+      desc: "Moderate challenges and govern users.",
+    });
   }
   if (globalRole === "SUPERADMIN") {
-    workspaces.push({ title: "Platform",    href: "/dashboard/platform",    desc: "Moderate challenges and govern users.", badge: "superadmin" });
+    workspaces.push({
+      title: "Platform",
+      href: "/dashboard/platform",
+      desc: "Moderate challenges and govern users.",
+      badge: "superadmin",
+    });
   }
 
   // if (canTeach(org) && !workspaces.some(w => w.href === "/dashboard/teach")) {
@@ -105,14 +124,20 @@ export function OrgAwareRoleGateway() {
           >
             <div>
               <div className="flex items-center gap-2">
-                <p className="font-mono text-xs font-bold uppercase text-indigo-100">{ws.title}</p>
+                <p className="font-mono text-xs font-bold uppercase text-indigo-100">
+                  {ws.title}
+                </p>
                 {ws.badge && (
-                  <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 font-mono text-[9px] uppercase text-amber-400">{ws.badge}</span>
+                  <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 font-mono text-[9px] uppercase text-amber-400">
+                    {ws.badge}
+                  </span>
                 )}
               </div>
               <p className="mt-0.5 text-[10px] text-zinc-500">{ws.desc}</p>
             </div>
-            <span className="ml-3 font-mono text-xs text-indigo-500 group-hover:text-indigo-300 transition-colors shrink-0">→</span>
+            <span className="ml-3 font-mono text-xs text-indigo-500 group-hover:text-indigo-300 transition-colors shrink-0">
+              →
+            </span>
           </Link>
         ))}
       </div>

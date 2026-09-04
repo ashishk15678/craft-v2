@@ -7,7 +7,9 @@ interface MobileNavContextType {
   setMobileOpen: (open: boolean) => void;
 }
 
-const MobileNavContext = createContext<MobileNavContextType | undefined>(undefined);
+const MobileNavContext = createContext<MobileNavContextType | undefined>(
+  undefined,
+);
 
 export function MobileNavProvider({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);

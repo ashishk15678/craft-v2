@@ -1,107 +1,99 @@
 "use client";
 
 import { trpc } from "@/lib/trpc/client";
-import { Check } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, BookOpen } from "lucide-react";
 
 export function LearnClient() {
-  const { data, isLoading, refetch } = trpc.track.getMyLearnings.useQuery();
-  const updateProgress = trpc.track.updateProgress.useMutation({
-    onSuccess: () => refetch()
-  });
+  const { data, isLoading, isError } = trpc.track.getMyLearnings.useQuery();
 
-  if (isLoading) return <div className="text-zinc-500 font-mono text-sm">Loading learnings...</div>;
-  if (!data?.enrollments.length) {
+  if (isLoading)
     return (
-      <div className="rounded-xl border border-border bg-card p-8 text-center">
-        <p className="text-zinc-500 font-mono text-sm mb-4">You haven&apos;t started any tracks yet.</p>
-        <a href="/dashboard/tracks" className="inline-block rounded-lg bg-indigo-600 px-4 py-2 font-mono text-xs font-bold uppercase text-white hover:bg-indigo-500 transition-colors">
-          Browse Tracks
-        </a>
+      <div className="font-mono text-sm text-zinc-500">
+        Loading your courses...
+      </div>
+    );
+
+  if (isError) {
+    return (
+      <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-5 font-mono text-sm text-red-300">
+        Unable to load your courses. Please refresh and try again.
       </div>
     );
   }
 
-  const { enrollments, trackProgress } = data;
-  const progressMap = new Map(trackProgress.map(p => [p.itemId, p.completed]));
+  if (!data?.enrollments.length) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-8 text-center">
+        <BookOpen className="mx-auto mb-3 text-indigo-400" size={28} />
+        <p className="mb-4 font-mono text-sm text-zinc-500">
+          You haven&apos;t enrolled in any courses yet.
+        </p>
+        <Link
+          href="/dashboard/tracks"
+          className="inline-block rounded-lg bg-indigo-600 px-4 py-2 font-mono text-xs font-bold uppercase text-white transition-colors hover:bg-indigo-500"
+        >
+          Browse courses
+        </Link>
+      </div>
+    );
+  }
+
+  const progressByItem = new Map(
+    data.trackProgress.map((progress) => [progress.itemId, progress.completed]),
+  );
 
   return (
-    <div className="space-y-6">
-      {enrollments.map(({ track }) => {
-        let totalItems = 0;
-        let completedItems = 0;
-        
-        track.modules.forEach(m => {
-          m.items.forEach(i => {
-            totalItems++;
-            if (progressMap.get(i.id)) completedItems++;
-          });
-        });
-        
-        const pct = totalItems === 0 ? 0 : Math.round((completedItems / totalItems) * 100);
+    <div className="grid gap-4 md:grid-cols-2">
+      {data.enrollments.map(({ track }) => {
+        const itemIds = track.modules.flatMap((module) =>
+          module.items.map((item) => item.id),
+        );
+        const itemCount = itemIds.length;
+        const completedCount = itemIds.filter((itemId) =>
+          progressByItem.get(itemId),
+        ).length;
+        const progress =
+          itemCount === 0 ? 0 : Math.round((completedCount / itemCount) * 100);
 
         return (
-          <div key={track.id} className="rounded-xl border border-border bg-card overflow-hidden">
-            <div className="p-5 border-b border-border bg-background flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <span className="font-mono text-[10px] font-bold uppercase text-indigo-400">{track.category}</span>
-                <h2 className="text-xl font-bold mt-1 text-text black-ops-one-regular uppercase">{track.title}</h2>
+          <article
+            key={track.id}
+            className="flex min-h-64 flex-col overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-indigo-500/50"
+          >
+            <div className="flex-1 p-5">
+              <p className="font-mono text-[10px] font-bold uppercase text-indigo-400">
+                {track.category ?? "Course"}
+              </p>
+              <h2 className="mt-1 text-xl font-bold uppercase text-text black-ops-one-regular">
+                {track.title}
+              </h2>
+              <p className="mt-3 line-clamp-3 text-sm text-zinc-400">
+                {track.description}
+              </p>
+              <div className="mt-5 flex items-center justify-between gap-3 font-mono text-[10px] uppercase text-zinc-500">
+                <span>{track.modules.length} modules</span>
+                <span>{itemCount} lessons</span>
               </div>
-              <div className="flex items-center gap-3 w-full md:w-48 shrink-0">
-                <div className="flex-1 h-2 bg-accent rounded-full overflow-hidden">
-                  <div className="h-full bg-indigo-500 transition-all" style={{ width: `${pct}%` }} />
-                </div>
-                <span className="font-mono text-xs font-bold text-indigo-400 w-8 text-right">{pct}%</span>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-accent">
+                <div
+                  className="h-full bg-indigo-500"
+                  style={{ width: `${progress}%` }}
+                />
               </div>
+              <p className="mt-2 font-mono text-[10px] uppercase text-indigo-400">
+                {progress}% complete
+              </p>
             </div>
-            
-            <div className="divide-y divide-border">
-              {track.modules.map(module => (
-                <div key={module.id} className="p-5 bg-background">
-                  <h3 className="font-mono text-xs font-bold text-zinc-300 uppercase tracking-wider mb-4">{module.title}</h3>
-                  <div className="space-y-3">
-                    {module.items.map(item => {
-                      const completed = progressMap.get(item.id) || false;
-                      let parsedData = null;
-                      try {
-                        if (item.data) parsedData = JSON.parse(item.data);
-                      } catch {}
-
-                      return (
-                        <div key={item.id} className={`flex gap-4 p-4 rounded-lg border transition-colors ${completed ? 'border-indigo-500/30 bg-indigo-500/5' : 'border-border/50 bg-card hover:border-border'}`}>
-                          <button
-                            onClick={() => updateProgress.mutate({ itemId: item.id, completed: !completed })}
-                            className={`mt-0.5 shrink-0 w-5 h-5 rounded-md flex items-center justify-center transition-colors ${completed ? 'bg-indigo-500 text-white' : 'bg-accent border border-border hover:border-indigo-500'}`}
-                          >
-                            {completed && <Check size={14} strokeWidth={3} />}
-                          </button>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <span className="font-mono text-[9px] uppercase text-zinc-500 bg-accent px-1.5 py-0.5 rounded">{item.type}</span>
-                              <h4 className={`font-mono text-xs font-bold uppercase ${completed ? 'text-zinc-500 line-through' : 'text-text'}`}>{item.title}</h4>
-                            </div>
-                            <p className="text-sm text-zinc-400 whitespace-pre-wrap leading-relaxed">{item.content}</p>
-                            
-                            {parsedData?.options && (
-                              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                {parsedData.options.map((opt: string, i: number) => {
-                                  const isCorrect = parsedData.correct === i + 1;
-                                  return (
-                                    <div key={i} className={`text-xs p-2.5 rounded font-mono border ${completed && isCorrect ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-accent/50 border-border/50 text-zinc-400'}`}>
-                                      <span className="opacity-50 mr-2">{String.fromCharCode(65 + i)}.</span> {opt}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+            <div className="border-t border-border bg-background p-5">
+              <Link
+                href={`/dashboard/learn/${track.id}`}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 font-mono text-xs font-bold uppercase text-white transition-colors hover:bg-indigo-500"
+              >
+                Explore course <ArrowRight size={14} />
+              </Link>
             </div>
-          </div>
+          </article>
         );
       })}
     </div>

@@ -8,15 +8,17 @@ import CreateOrganization from "./createOrganization";
 import { useState } from "react";
 import { useMobileNav } from "@/contexts/mobile-nav-context";
 
-
 const BASE_NAV = [
   ["Overview", "/dashboard"],
   ["My learning", "/dashboard/learn"],
   ["AI Topics", "/dashboard/topics"],
   ["Explore tracks", "/dashboard/tracks"],
+  ["Practice arena", "/dashboard/practice"],
+  ["Timed assessments", "/dashboard/assessments"],
   ["AI companion", "/dashboard/assistant"],
   ["Community", "/dashboard/community"],
   ["Portfolio proof", "/dashboard/portfolio"],
+  ["Profile & rewards", "/dashboard/profile"],
   ["Settings", "/dashboard/settings"],
 ] as const;
 

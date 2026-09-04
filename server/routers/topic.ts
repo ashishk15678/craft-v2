@@ -12,7 +12,9 @@ export const topicRouter = router({
       return ctx.prisma.topic.findMany({
         where: {
           creatorId: ctx.user.id,
-          ...(input.organizationId ? { organizationId: input.organizationId } : {}),
+          ...(input.organizationId
+            ? { organizationId: input.organizationId }
+            : {}),
         },
         orderBy: { createdAt: "desc" },
         select: {

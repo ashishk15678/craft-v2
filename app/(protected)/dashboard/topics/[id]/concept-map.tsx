@@ -21,11 +21,34 @@ import type { TopicContent } from "@/app/api/ai/generate-topic/route";
 
 type ConceptNode = TopicContent["conceptMap"]["nodes"][number];
 
-const TYPE_STYLE: Record<ConceptNode["type"], { bg: string; border: string; text: string; badge: string }> = {
-  core:       { bg: "bg-indigo-950",   border: "border-indigo-500",   text: "text-indigo-100",   badge: "bg-indigo-500 text-white" },
-  supporting: { bg: "bg-zinc-900",     border: "border-zinc-600",     text: "text-zinc-100",     badge: "bg-zinc-600 text-white" },
-  example:    { bg: "bg-emerald-950",  border: "border-emerald-600",  text: "text-emerald-100",  badge: "bg-emerald-600 text-white" },
-  pitfall:    { bg: "bg-red-950",      border: "border-red-600",      text: "text-red-100",      badge: "bg-red-600 text-white" },
+const TYPE_STYLE: Record<
+  ConceptNode["type"],
+  { bg: string; border: string; text: string; badge: string }
+> = {
+  core: {
+    bg: "bg-indigo-950",
+    border: "border-indigo-500",
+    text: "text-indigo-100",
+    badge: "bg-indigo-500 text-white",
+  },
+  supporting: {
+    bg: "bg-zinc-900",
+    border: "border-zinc-600",
+    text: "text-zinc-100",
+    badge: "bg-zinc-600 text-white",
+  },
+  example: {
+    bg: "bg-emerald-950",
+    border: "border-emerald-600",
+    text: "text-emerald-100",
+    badge: "bg-emerald-600 text-white",
+  },
+  pitfall: {
+    bg: "bg-red-950",
+    border: "border-red-600",
+    text: "text-red-100",
+    badge: "bg-red-600 text-white",
+  },
 };
 
 const TYPE_LABEL: Record<ConceptNode["type"], string> = {
@@ -48,17 +71,31 @@ function ConceptNodeComponent({
         ${style.bg} ${style.border}
       `}
     >
-      <Handle type="target" position={Position.Left} className="!bg-zinc-500 !border-zinc-400" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="!bg-zinc-500 !border-zinc-400"
+      />
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
-          <p className={`text-xs font-bold leading-tight ${style.text}`}>{data.label}</p>
-          <p className="text-[10px] text-zinc-400 mt-1 leading-snug line-clamp-2">{data.description}</p>
+          <p className={`text-xs font-bold leading-tight ${style.text}`}>
+            {data.label}
+          </p>
+          <p className="text-[10px] text-zinc-400 mt-1 leading-snug line-clamp-2">
+            {data.description}
+          </p>
         </div>
       </div>
-      <span className={`mt-2 inline-block rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase ${style.badge}`}>
+      <span
+        className={`mt-2 inline-block rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase ${style.badge}`}
+      >
         {TYPE_LABEL[data.type]}
       </span>
-      <Handle type="source" position={Position.Right} className="!bg-zinc-500 !border-zinc-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="!bg-zinc-500 !border-zinc-400"
+      />
     </div>
   );
 }
@@ -137,14 +174,20 @@ export function ConceptMapViewer({
   const [edges, , onEdgesChange] = useEdgesState(layoutEdges);
 
   return (
-    <div className="rounded-xl border border-border overflow-hidden" style={{ height: 520 }}>
+    <div
+      className="rounded-xl border border-border overflow-hidden"
+      style={{ height: 520 }}
+    >
       {/* Legend */}
       <div className="flex items-center gap-3 border-b border-border bg-card px-4 py-2">
         <span className="text-xs font-bold text-muted-foreground">Legend:</span>
         {Object.entries(TYPE_LABEL).map(([type, label]) => {
           const s = TYPE_STYLE[type as ConceptNode["type"]];
           return (
-            <span key={type} className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${s.badge}`}>
+            <span
+              key={type}
+              className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${s.badge}`}
+            >
               {label}
             </span>
           );
@@ -164,12 +207,24 @@ export function ConceptMapViewer({
         className="bg-zinc-950"
         aria-label="Concept map"
       >
-        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#27272a" />
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={24}
+          size={1}
+          color="#27272a"
+        />
         <Controls className="!bg-zinc-900 !border-zinc-700 !rounded-lg overflow-hidden" />
         <MiniMap
           nodeColor={(n) => {
             const t = (n.data as { type: ConceptNode["type"] }).type;
-            return { core: "#6366f1", supporting: "#52525b", example: "#10b981", pitfall: "#ef4444" }[t] ?? "#52525b";
+            return (
+              {
+                core: "#6366f1",
+                supporting: "#52525b",
+                example: "#10b981",
+                pitfall: "#ef4444",
+              }[t] ?? "#52525b"
+            );
           }}
           maskColor="rgba(9,9,11,0.7)"
           className="!bg-zinc-900 !border-zinc-700 !rounded-lg overflow-hidden"

@@ -3,30 +3,30 @@
 // It sits above SUPERADMIN and can do everything, plus manage all organisations globally.
 
 export type AppRole =
-  | "ORG_MANAGER"
-  | "SUPERADMIN"
-  | "ADMIN"
-  | "EDITOR"
-  | "TEACHER"
-  | "STUDENT";
+  "ORG_MANAGER" | "SUPERADMIN" | "ADMIN" | "EDITOR" | "TEACHER" | "STUDENT";
 
 export type Permission =
   | "challenges:read"
   | "challenges:write"
   | "submissions:review"
   | "students:read"
-  | "organization:create"    // any user can create an org; enforced in API separately
-  | "organization:manage"    // manage members within orgs you own/admin
-  | "organization:global"    // ORG_MANAGER: full control over every org
+  | "organization:create" // any user can create an org; enforced in API separately
+  | "organization:manage" // manage members within orgs you own/admin
+  | "organization:global" // ORG_MANAGER: full control over every org
   | "marketplace:manage"
   | "users:manage"
   | "platform:manage"
-  | "platform:owner";        // ORG_MANAGER only – change other superadmin roles, etc.
+  | "platform:owner"; // ORG_MANAGER only – change other superadmin roles, etc.
 
 // Per-organization granular roles (stored as string in OrganizationMember.role)
 export type OrgRole = "ORG_OWNER" | "ORG_ADMIN" | "INSTRUCTOR" | "LEARNER";
 
-export const ORG_ROLES: OrgRole[] = ["ORG_OWNER", "ORG_ADMIN", "INSTRUCTOR", "LEARNER"];
+export const ORG_ROLES: OrgRole[] = [
+  "ORG_OWNER",
+  "ORG_ADMIN",
+  "INSTRUCTOR",
+  "LEARNER",
+];
 
 export function isOrgRole(value: unknown): value is OrgRole {
   return typeof value === "string" && ORG_ROLES.includes(value as OrgRole);
@@ -121,7 +121,7 @@ export function isAllowed(
 ): boolean {
   return Boolean(
     role &&
-      role in Roles &&
-      Roles[role as AppRole].allowed.includes(permission),
+    role in Roles &&
+    Roles[role as AppRole].allowed.includes(permission),
   );
 }

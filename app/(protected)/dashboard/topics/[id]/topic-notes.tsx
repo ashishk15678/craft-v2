@@ -22,23 +22,41 @@ export function TopicNotes({ notes }: { notes: string }) {
       const level = line.startsWith("##") ? 2 : 1;
       const text = line.replace(/^#{1,2}\s/, "");
       rendered.push(
-        level === 1
-          ? <h2 key={i} className="mt-5 mb-2 text-base font-black text-foreground">{text}</h2>
-          : <h3 key={i} className="mt-4 mb-1.5 text-sm font-bold text-foreground">{text}</h3>
+        level === 1 ? (
+          <h2
+            key={i}
+            className="mt-5 mb-2 text-base font-black text-foreground"
+          >
+            {text}
+          </h2>
+        ) : (
+          <h3 key={i} className="mt-4 mb-1.5 text-sm font-bold text-foreground">
+            {text}
+          </h3>
+        ),
       );
     } else if (/^[-*]\s/.test(line)) {
       rendered.push(
-        <div key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-400" aria-hidden />
+        <div
+          key={i}
+          className="flex items-start gap-2 text-sm text-muted-foreground"
+        >
+          <span
+            className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-400"
+            aria-hidden
+          />
           <span
             dangerouslySetInnerHTML={{
               __html: line
                 .replace(/^[-*]\s/, "")
                 .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-                .replace(/`([^`]+)`/g, "<code class='rounded bg-accent px-1 py-0.5 font-mono text-xs text-foreground'>$1</code>"),
+                .replace(
+                  /`([^`]+)`/g,
+                  "<code class='rounded bg-accent px-1 py-0.5 font-mono text-xs text-foreground'>$1</code>",
+                ),
             }}
           />
-        </div>
+        </div>,
       );
     } else if (line.trim() === "") {
       rendered.push(<div key={i} className="h-2" aria-hidden />);
@@ -50,9 +68,12 @@ export function TopicNotes({ notes }: { notes: string }) {
           dangerouslySetInnerHTML={{
             __html: line
               .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-              .replace(/`([^`]+)`/g, "<code class='rounded bg-accent px-1 py-0.5 font-mono text-xs text-foreground'>$1</code>"),
+              .replace(
+                /`([^`]+)`/g,
+                "<code class='rounded bg-accent px-1 py-0.5 font-mono text-xs text-foreground'>$1</code>",
+              ),
           }}
-        />
+        />,
       );
     }
   }
@@ -66,15 +87,19 @@ export function TopicNotes({ notes }: { notes: string }) {
           className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
           title="Copy notes as markdown"
         >
-          {copied
-            ? <><Check className="h-3.5 w-3.5 text-emerald-400" aria-hidden /> Copied</>
-            : <><Copy className="h-3.5 w-3.5" aria-hidden /> Copy markdown</>
-          }
+          {copied ? (
+            <>
+              <Check className="h-3.5 w-3.5 text-emerald-400" aria-hidden />{" "}
+              Copied
+            </>
+          ) : (
+            <>
+              <Copy className="h-3.5 w-3.5" aria-hidden /> Copy markdown
+            </>
+          )}
         </button>
       </div>
-      <div className="px-5 py-4 space-y-1">
-        {rendered}
-      </div>
+      <div className="px-5 py-4 space-y-1">{rendered}</div>
     </div>
   );
 }

@@ -30,28 +30,48 @@ export const protectedProcedure = t.procedure.use(isAuthed);
 export function requireGlobalRole(min: GlobalRole) {
   return isAuthed.unstable_pipe(({ ctx, next }) => {
     if (!hasGlobalRole(ctx.user.role, min)) {
-      throw new TRPCError({ code: "FORBIDDEN", message: `Requires ${min} or above` });
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: `Requires ${min} or above`,
+      });
     }
     return next({ ctx });
   });
 }
 
 export const adminProcedure = t.procedure.use(requireGlobalRole("ADMIN"));
-export const superadminProcedure = t.procedure.use(requireGlobalRole("SUPERADMIN"));
+export const superadminProcedure = t.procedure.use(
+  requireGlobalRole("SUPERADMIN"),
+);
 
+export const orgProcedure = protectedProcedure.use(
+  async ({ ctx, input: rawInput, next }) => {
+    const input = rawInput as { organizationId?: string };
+    if (!input.organizationId)
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "organizationId required",
+      });
 
-export const orgProcedure = protectedProcedure.use(async ({ ctx, input: rawInput, next }) => {
-  const input = rawInput as { organizationId?: string };
-  if (!input.organizationId) throw new TRPCError({ code: "BAD_REQUEST", message: "organizationId required" });
+    const member = await ctx.prisma.organizationMember.findUnique({
+      where: {
+        organizationId_userId: {
+          organizationId: input.organizationId,
+          userId: ctx.user.id,
+        },
+      },
+      include: { organization: true },
+    });
 
-  const member = await ctx.prisma.organizationMember.findUnique({
-    where: { organizationId_userId: { organizationId: input.organizationId, userId: ctx.user.id } },
-    include: { organization: true },
-  });
+    if (!member && !hasGlobalRole(ctx.user.role, "ADMIN")) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Not a member of this organization",
+      });
+    }
 
-  if (!member && !hasGlobalRole(ctx.user.role, "ADMIN")) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Not a member of this organization" });
-  }
-
-  return next({ ctx: { ...ctx, member, orgRole: (member?.role ?? null) as string | null } });
-});
+    return next({
+      ctx: { ...ctx, member, orgRole: (member?.role ?? null) as string | null },
+    });
+  },
+);

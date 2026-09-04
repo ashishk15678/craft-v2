@@ -20,7 +20,7 @@ export function OrgSwitcher() {
   // Not inside OrgProvider (unauthenticated / non-protected page) – render nothing
   if (!orgCtx) return null;
 
-  const { currentOrg, switchOrg ,orgs } = orgCtx;
+  const { currentOrg, switchOrg, orgs } = orgCtx;
 
   if (!currentOrg) return null;
 
@@ -51,7 +51,9 @@ export function OrgSwitcher() {
               <span className="flex items-center justify-between w-full gap-2">
                 <span>{m.name}</span>
                 {currentOrg?.id === m.id && (
-                  <span className="font-mono text-[10px] text-indigo-400">active</span>
+                  <span className="font-mono text-[10px] text-indigo-400">
+                    active
+                  </span>
                 )}
               </span>
             </DropdownMenuItem>

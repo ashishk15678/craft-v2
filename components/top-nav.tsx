@@ -15,10 +15,12 @@ export async function TopNavBar() {
       <div className="relative md:max-w-4xl max-w-md mx-auto h-10 flex flex-row justify-between items-center px-4">
         {/* Brand & Org Switcher */}
         <div className="flex flex-row items-center space-x-3">
-          <Link href="/" className="black-ops-one-regular text-sm tracking-wide">
+          <Link
+            href="/"
+            className="black-ops-one-regular text-sm tracking-wide"
+          >
             Craft-v2
           </Link>
-
         </div>
 
         {/* Center navigation */}

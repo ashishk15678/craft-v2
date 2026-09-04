@@ -9,29 +9,24 @@
  */
 
 export type GlobalRole =
-  | "ORG_MANAGER"
-  | "SUPERADMIN"
-  | "ADMIN"
-  | "EDITOR"
-  | "TEACHER"
-  | "STUDENT";
+  "ORG_MANAGER" | "SUPERADMIN" | "ADMIN" | "EDITOR" | "TEACHER" | "STUDENT";
 
 export type OrgRole = "ORG_OWNER" | "ORG_ADMIN" | "INSTRUCTOR" | "LEARNER";
 
 const GLOBAL_LEVEL: Record<GlobalRole, number> = {
   ORG_MANAGER: 6,
-  SUPERADMIN:  5,
-  ADMIN:       4,
-  EDITOR:      3,
-  TEACHER:     2,
-  STUDENT:     1,
+  SUPERADMIN: 5,
+  ADMIN: 4,
+  EDITOR: 3,
+  TEACHER: 2,
+  STUDENT: 1,
 };
 
 const ORG_LEVEL: Record<OrgRole, number> = {
   ORG_OWNER: 4,
   ORG_ADMIN: 3,
   INSTRUCTOR: 2,
-  LEARNER:    1,
+  LEARNER: 1,
 };
 
 /** Returns true when the user's global role meets the minimum required. */
@@ -55,7 +50,9 @@ export function canTeach(
   globalRole: string | undefined,
   orgRole: string | null | undefined,
 ): boolean {
-  return hasGlobalRole(globalRole, "TEACHER") || hasOrgRole(orgRole, "INSTRUCTOR");
+  return (
+    hasGlobalRole(globalRole, "TEACHER") || hasOrgRole(orgRole, "INSTRUCTOR")
+  );
 }
 
 /** True when the user can manage org settings: ADMIN+ globally, or ORG_OWNER/ORG_ADMIN in org. */
